@@ -9,4 +9,4 @@ COPY --chown=moc:moc tests ./tests
 COPY alembic.ini pyproject.toml ./
 USER moc
 EXPOSE 8000
-CMD ["sh", "-c", "echo '==> [1/3] Running database migrations...' && python -m alembic upgrade head && echo '==> [2/3] Seeding cultivation guide...' && python -m app.commands.seed_cultivation && echo \"==> [3/3] Starting Uvicorn on port ${PORT:-8000}...\" && exec python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "echo '==> [1/3] Running database migrations...' && python -m alembic upgrade head && echo '==> [2/3] Seeding cultivation guide...' && (python -m app.commands.seed_cultivation || true) && echo \"==> [3/3] Starting Uvicorn on port ${PORT:-8000}...\" && exec python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
