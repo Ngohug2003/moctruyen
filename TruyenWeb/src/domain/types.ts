@@ -8,6 +8,7 @@ export type Book = {
   chunks: string[];
   pageSize: number;
   pageCount: number;
+  source?: 'local' | 'cloud';
 };
 export type ChapterMeta = { id: string; position: number; number: number; title: string };
 export type Chapter = ChapterMeta & { content: string };

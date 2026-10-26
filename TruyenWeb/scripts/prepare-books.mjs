@@ -35,43 +35,49 @@ export function prepareBooks() {
   mkdirSync(output, { recursive: true });
   const books = new Map();
   const metaFile = resolve(app, 'assets/book-meta.json');
-  if (existsSync(metaFile)) {
-    const meta = JSON.parse(readFileSync(metaFile, 'utf8'));
-    if (!meta.demo) {
-      const db = new DatabaseSync(resolve(app, 'assets/catalog.db'), { readOnly: true });
-      let chapters;
-      try {
-        chapters = db
-          .prepare(
-            'SELECT id,position,number,title FROM chapters WHERE book_id=? ORDER BY position',
-          )
-          .all(meta.bookId);
-      } finally {
-        db.close();
+  const catalogDbFile = resolve(app, 'assets/catalog.db');
+  if (existsSync(metaFile) && existsSync(catalogDbFile)) {
+    try {
+      const meta = JSON.parse(readFileSync(metaFile, 'utf8'));
+      if (!meta.demo) {
+        const db = new DatabaseSync(catalogDbFile, { readOnly: true });
+        let chapters;
+        try {
+          chapters = db
+            .prepare(
+              'SELECT id,position,number,title FROM chapters WHERE book_id=? ORDER BY position',
+            )
+            .all(meta.bookId);
+        } finally {
+          db.close();
+        }
+        if (chapters.length === meta.count && meta.chunkSize === pageSize) {
+          const book = publishBook(
+            output,
+            {
+              id: meta.bookId,
+              title: meta.title,
+              total: meta.count,
+              version: meta.hash,
+              chunks: meta.chunks.map((chunk) => basename(chunk.file)),
+            },
+            chapters,
+            (folder) => {
+              for (const chunk of meta.chunks) {
+                const destination = resolve(folder, basename(chunk.file));
+                const chunkSource = resolve(app, 'assets', chunk.file);
+                if (existsSync(chunkSource)) {
+                  if (!existsSync(destination) || statSync(destination).size !== chunk.bytes)
+                    copyFileSync(chunkSource, destination);
+                }
+              }
+            },
+          );
+          books.set(book.id, book);
+        }
       }
-      if (chapters.length !== meta.count || meta.chunkSize !== pageSize)
-        throw new Error(
-          'Mục lục app chưa khớp dữ liệu. Chạy prepare:book trong TruyenReader trước.',
-        );
-      const book = publishBook(
-        output,
-        {
-          id: meta.bookId,
-          title: meta.title,
-          total: meta.count,
-          version: meta.hash,
-          chunks: meta.chunks.map((chunk) => basename(chunk.file)),
-        },
-        chapters,
-        (folder) => {
-          for (const chunk of meta.chunks) {
-            const destination = resolve(folder, basename(chunk.file));
-            if (!existsSync(destination) || statSync(destination).size !== chunk.bytes)
-              copyFileSync(resolve(app, 'assets', chunk.file), destination);
-          }
-        },
-      );
-      books.set(book.id, book);
+    } catch (err) {
+      console.warn('Bỏ qua đóng gói từ TruyenReader:', err.message);
     }
   }
   const input = resolve(root, 'input');
@@ -106,16 +112,18 @@ export function prepareBooks() {
     );
     books.set(book.id, book);
   }
-  if (!books.size)
-    throw new Error(
-      'Chưa có truyện. Thêm JSON vào TruyenWeb/input hoặc chuẩn bị truyện trong TruyenReader.',
-    );
   // Commit the library index last; each immutable version remains available to open tabs.
   const library = [...books.values()];
   write(resolve(output, 'index.json'), library);
-  console.log(
-    `Thư viện web: ${library.map((book) => `${book.title} (${book.total.toLocaleString('vi-VN')} mục)`).join(', ')}`,
-  );
+  if (library.length > 0) {
+    console.log(
+      `Thư viện web: ${library.map((book) => `${book.title} (${book.total.toLocaleString('vi-VN')} mục)`).join(', ')}`,
+    );
+  } else {
+    console.log(
+      'Thư viện web: Không có truyện tĩnh đóng gói sẵn; web sẽ tải danh mục và chương trực tuyến qua API https://moctruyen.onrender.com.',
+    );
+  }
   return library;
 }
 

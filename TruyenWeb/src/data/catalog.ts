@@ -56,24 +56,35 @@ export async function resumePosition(
 ) {
   if (!progress) return 0;
   if (progress.version === book.version && progress.position < book.total) return progress.position;
+  if (progress.chapterId) {
+    try {
+      const ch = await cloud.request<{ position: number }>(
+        `/public/books/${book.id}/chapters/by-id/${progress.chapterId}`,
+        undefined,
+        'GET',
+        4000,
+      );
+      if (ch && typeof ch.position === 'number' && ch.position >= 0 && ch.position < book.total) {
+        return ch.position;
+      }
+    } catch {}
+  }
+  if (progress.position != null && progress.position >= 0 && progress.position < book.total) {
+    return progress.position;
+  }
   const chapters = await getSearch(book);
   return chapters.find((chapter) => chapter.id === progress.chapterId)?.position ?? 0;
 }
 
 export async function getLibrary(): Promise<Book[]> {
-  return readLocalFirst(
-    async () => {
-      const books = await getLocalLibrary();
-      if (!books.length) throw new Error('Chưa có truyện trong file JSON.');
-      return books;
-    },
-    async () => {
-      const result = await cloud.request<{ items: Book[] }>(
-        '/public/books?page_size=100',
-        undefined,
-        'GET',
-        1500,
-      );
+  try {
+    const result = await cloud.request<{ items: Book[] }>(
+      '/public/books?page_size=100',
+      undefined,
+      'GET',
+      10000,
+    );
+    if (result && Array.isArray(result.items) && result.items.length > 0) {
       return result.items.map((book) => ({
         ...book,
         title: book.title.normalize('NFC'),
@@ -81,11 +92,31 @@ export async function getLibrary(): Promise<Book[]> {
         pageCount: Math.ceil(book.total / 50),
         basePath: `books/${book.id}/${book.version}`,
         chunks: Array.from({ length: Math.ceil(book.total / 50) }, (_, i) => `content-${i}.json`),
+        source: 'cloud',
       }));
-    },
-  );
+    }
+  } catch (err) {
+    console.warn('Không tải được danh mục từ API, chuyển sang dữ liệu cục bộ:', err);
+  }
+  return (await getLocalLibrary()).map((book) => ({
+    ...book,
+    title: book.title.normalize('NFC'),
+    source: 'local',
+  }));
 }
 export async function getPage(book: Book, page: number): Promise<ChapterMeta[]> {
+  if (book.source === 'cloud') {
+    try {
+      const res = await cloud.request<{ items: ChapterMeta[] }>(
+        `/public/books/${book.id}/chapters?page=${page + 1}&page_size=50`,
+        undefined,
+        'GET',
+        10000,
+      );
+      if (res && Array.isArray(res.items)) return res.items.map(normalizeTitle);
+    } catch {}
+    return getLocalPage(book, page);
+  }
   return readLocalFirst(
     () => getLocalPage(book, page),
     async () =>
@@ -94,30 +125,76 @@ export async function getPage(book: Book, page: number): Promise<ChapterMeta[]> 
           `/public/books/${book.id}/chapters?page=${page + 1}&page_size=50`,
           undefined,
           'GET',
-          1500,
+          10000,
         )
       ).items.map(normalizeTitle),
   );
 }
 export async function getSearch(book: Book): Promise<ChapterMeta[]> {
-  return readLocalFirst(
-    () => getLocalSearch(book),
-    async () => {
-      const rows: ChapterMeta[] = [];
-      for (let page = 0; page < book.pageCount; page++) rows.push(...(await getPage(book, page)));
+  const cacheKey = `search:${book.id}:${book.version}`;
+  if (cache.has(cacheKey)) return cache.get(cacheKey) as ChapterMeta[];
+
+  if (book.source !== 'cloud') {
+    try {
+      const local = await getLocalSearch(book);
+      if (local && local.length > 0) {
+        cache.set(cacheKey, local);
+        return local;
+      }
+    } catch {}
+  }
+
+  // Fetch chapters in parallel chunks of 100
+  const totalPages = Math.ceil(book.total / 100);
+  const pagesToFetch = Math.min(totalPages, 50);
+  try {
+    const chunks = await Promise.all(
+      Array.from({ length: pagesToFetch }, (_, i) =>
+        cloud
+          .request<{ items: ChapterMeta[] }>(
+            `/public/books/${book.id}/chapters?page=${i + 1}&page_size=100`,
+            undefined,
+            'GET',
+            15000,
+          )
+          .then((res) => (res?.items || []).map(normalizeTitle))
+          .catch(() => [] as ChapterMeta[]),
+      ),
+    );
+    const rows = chunks.flat();
+    if (rows.length > 0) {
+      cache.set(cacheKey, rows);
       return rows;
-    },
-  );
+    }
+  } catch {}
+
+  return getLocalSearch(book);
 }
 export async function getChapter(book: Book, position: number): Promise<Chapter> {
-  return readLocalFirst(
-    () => getLocalChapter(book, position),
-    () =>
-      cloud.request<Chapter>(
+  if (book.source === 'cloud') {
+    try {
+      const res = await cloud.request<Chapter>(
         `/public/books/${book.id}/chapters/${position}`,
         undefined,
         'GET',
-        1500,
-      ),
+        10000,
+      );
+      if (res && res.content) {
+        return { ...res, content: res.content.normalize('NFC') };
+      }
+    } catch {}
+    return getLocalChapter(book, position);
+  }
+  return readLocalFirst(
+    () => getLocalChapter(book, position),
+    async () => {
+      const res = await cloud.request<Chapter>(
+        `/public/books/${book.id}/chapters/${position}`,
+        undefined,
+        'GET',
+        10000,
+      );
+      return { ...res, content: res.content.normalize('NFC') };
+    },
   );
 }

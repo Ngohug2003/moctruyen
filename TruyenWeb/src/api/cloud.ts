@@ -11,10 +11,12 @@ const credentials = {
     sessionStorage.setItem(key, value);
   },
 };
+export const DEFAULT_API_URL = 'https://moctruyen.onrender.com';
+
 export const cloud = createCloud(
   storage,
   credentials,
-  import.meta.env.VITE_API_URL ?? `http://${location.hostname}:8000`,
+  import.meta.env.VITE_API_URL || DEFAULT_API_URL,
 );
 window.addEventListener('online', () => {
   void cloud.sync();
