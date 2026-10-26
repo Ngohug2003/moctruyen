@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: moc-truyen-api
+    runtime: docker
+    dockerfilePath: ./TruyenBackend/Dockerfile
+    dockerContext: ./TruyenBackend
+    plan: free
+    region: singapore
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: "*"

@@ -9,4 +9,4 @@ COPY --chown=moc:moc tests ./tests
 COPY alembic.ini pyproject.toml ./
 USER moc
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "python -m alembic upgrade head && python -m app.commands.seed_cultivation && python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
