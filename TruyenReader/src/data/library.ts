@@ -2,11 +2,14 @@ import { Platform } from 'react-native';
 import { readLocalFirst } from '../domain/read-source';
 import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import meta from '../../assets/book-meta.json';
+import debaTocRaw from '../../assets/deba-toc.json';
 import { cloud } from '../api/cloud';
 import { APPLY_BUNDLED_BOOK_SQL, SCHEMA, fold, type NormalizedBook } from '../domain/book-format';
 import { CHAPTER_PAGE_SIZE, chapterPageQuery } from '../domain/chapter-query';
 import { REMOVE_LEGACY_SAMPLE_SQL } from '../domain/library-cleanup';
 import { getBundledContent } from './bundled-content';
+
+const debaToc = debaTocRaw as Array<{ id: string; position: number; number: number; title: string }>;
 
 export type Book = {
   id: string;
@@ -93,6 +96,20 @@ export async function initializeWeb() {
   await cloud.init();
   cloud.receive(applyRemote);
   void cloud.sync();
+  if (meta.bookId) {
+    const prog = getWebProgress(meta.bookId);
+    webBooksMap.set(meta.bookId, {
+      id: meta.bookId,
+      title: meta.title || 'Đế Bá',
+      total: meta.count || debaToc.length,
+      source: 'bundled',
+      updated_at: new Date().toISOString(),
+      chapter_id: prog?.chapter_id || null,
+      offset: prog?.offset || null,
+      chapter_title: prog?.chapter_title || null,
+      position: prog?.position != null ? prog.position : null,
+    });
+  }
   await syncRemoteCatalog();
 }
 
@@ -231,7 +248,7 @@ export async function getChapterPage(
         'GET',
         5000,
       );
-      if (remote && Array.isArray(remote.items)) {
+      if (remote && Array.isArray(remote.items) && remote.items.length > 0) {
         for (const it of remote.items) {
           const key = `${bookId}:${it.id}`;
           if (!webChaptersCache.has(key)) {
@@ -262,6 +279,40 @@ export async function getChapterPage(
       }
     } catch (err) {
       console.warn('getChapterPage web error:', err);
+    }
+    if (bookId === meta.bookId) {
+      let list = debaToc;
+      if (query.trim()) {
+        const fq = fold(query.trim());
+        list = list.filter((r) => fold(r.title).includes(fq));
+      }
+      const start = page * CHAPTER_PAGE_SIZE;
+      const slice = list.slice(start, start + CHAPTER_PAGE_SIZE);
+      for (const it of slice) {
+        const key = `${bookId}:${it.id}`;
+        if (!webChaptersCache.has(key)) {
+          webChaptersCache.set(key, {
+            id: it.id,
+            book_id: bookId,
+            position: it.position,
+            number: it.number,
+            title: it.title,
+            content: '',
+            url: '',
+            marked: isWebMarked(bookId, it.id) ? 1 : 0,
+          });
+        }
+      }
+      return {
+        rows: slice.map((it) => ({
+          id: it.id,
+          position: it.position,
+          number: it.number,
+          title: it.title,
+          marked: isWebMarked(bookId, it.id) ? 1 : 0,
+        })),
+        total: list.length,
+      };
     }
     return { rows: [], total: 0 };
   }
@@ -358,6 +409,29 @@ export async function getChapterAt(bookId: string, position: number): Promise<Ch
     } catch (err) {
       console.warn('getChapterAt web remote error:', err);
     }
+    if (bookId === meta.bookId && debaToc[position]) {
+      const item = debaToc[position];
+      const key = `${bookId}:${item.id}`;
+      if (!webChaptersCache.has(key)) {
+        webChaptersCache.set(key, {
+          id: item.id,
+          book_id: bookId,
+          position: item.position,
+          number: item.number,
+          title: item.title,
+          content: '',
+          url: '',
+          marked: isWebMarked(bookId, item.id) ? 1 : 0,
+        });
+      }
+      return {
+        id: item.id,
+        position: item.position,
+        number: item.number,
+        title: item.title,
+        marked: isWebMarked(bookId, item.id) ? 1 : 0,
+      };
+    }
     return null;
   }
 
@@ -451,6 +525,28 @@ export async function getChapter(bookId: string, id: string): Promise<Chapter | 
       }
     } catch (err) {
       console.warn('getChapter web remote error:', err);
+    }
+    if (bookId === meta.bookId) {
+      try {
+        const bundled = await getBundledContent(bookId, pos, id);
+        if (bundled) {
+          const title = item?.title || debaToc[pos]?.title || `Chương ${pos + 1}`;
+          const finalItem: Chapter = {
+            id,
+            book_id: bookId,
+            position: pos,
+            number: pos + 1,
+            title,
+            content: bundled,
+            url: '',
+            marked: isWebMarked(bookId, id) ? 1 : 0,
+          };
+          webChaptersCache.set(key, finalItem);
+          return finalItem;
+        }
+      } catch (err) {
+        console.warn('getBundledContent web error:', err);
+      }
     }
     return item || null;
   }
