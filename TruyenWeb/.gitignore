@@ -1,0 +1,10 @@
+node_modules/
+dist/
+public/books/
+public/knowledge/
+input/*.json
+test-results/
+.env
+.env.*
+!.env.example
+*.log

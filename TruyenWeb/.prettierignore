@@ -1,0 +1,8 @@
+node_modules
+dist
+public/books
+input/*.json
+package-lock.json
+test-results
+
+public/knowledge

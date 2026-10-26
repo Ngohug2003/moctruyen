@@ -1,0 +1,995 @@
+{
+  "book_id": "faec571705be16f3",
+  "title": "Cảnh giới Đế Bá",
+  "version": "2026-10-19.2",
+  "updated_at": "2026-10-19",
+  "intro": "Tra cứu theo giới vực và nhánh tu luyện. Thứ tự chỉ có ý nghĩa trong cùng hệ; không phải bảng quy đổi sức mạnh giữa các thế giới. Có tên cảnh giới ở phần sau truyện.",
+  "source_note": "Tổng hợp tên gọi từ bài tham khảo và đối chiếu các chương trong bản truyện hiện có. Giữ tên của bản đang đọc; biến thể được ghi riêng. Những hệ chưa đủ chứng cứ được đánh dấu tham khảo, không suy diễn thêm cấp bậc. Các tiểu cảnh được ghi theo ảnh/bài tham khảo bạn cung cấp; các chương dẫn kèm dùng để đối chiếu tên hệ và thứ tự chính, không khẳng định xác nhận mọi chi tiết của bài tổng hợp.",
+  "sources": [
+    {
+      "id": "thuvienanime",
+      "title": "Thư Viện Anime — Cảnh giới Đế Bá",
+      "url": "https://thuvienanime.net/de-ba/",
+      "kind": "reference",
+      "chapter_position": null
+    },
+    {
+      "id": "chapter-14",
+      "title": "Đế Bá — Chương 14: Loạn Tâm Lâm (hạ)",
+      "url": "https://metruyenchu.com.vn/de-ba/chuong-14-hTYARxWj3Qza",
+      "kind": "novel",
+      "chapter_position": 13
+    },
+    {
+      "id": "chapter-369",
+      "title": "Đế Bá — Chương 369: Bát Sí Thần Hổ",
+      "url": "https://metruyenchu.com.vn/de-ba/chuong-369-JZLn7kj84KC1",
+      "kind": "novel",
+      "chapter_position": 368
+    },
+    {
+      "id": "chapter-1753",
+      "title": "Đế Bá — Chương 1753: Đại Đạo tu hành",
+      "url": "https://metruyenchu.com.vn/de-ba/chuong-1753-TJ0LSzwb3LAn",
+      "kind": "novel",
+      "chapter_position": 1750
+    },
+    {
+      "id": "chapter-2134",
+      "title": "Đế Bá — Chương 2134: Dương Thắng Bình",
+      "url": "https://metruyenchu.com.vn/de-ba/chuong-2134-HODoF9jyci9g",
+      "kind": "novel",
+      "chapter_position": 2132
+    },
+    {
+      "id": "chapter-3248",
+      "title": "Đế Bá — Chương 3248: Vương Giả Bá Thể",
+      "url": "https://metruyenchu.com.vn/de-ba/chuong-3248-PjEzBphTA4ur",
+      "kind": "novel",
+      "chapter_position": 3246
+    },
+    {
+      "id": "chapter-3450",
+      "title": "Đế Bá — Chương 3450: Không Gian Long Đế",
+      "url": "https://metruyenchu.com.vn/de-ba/chuong-3450-w98XNNFI90Ji",
+      "kind": "novel",
+      "chapter_position": 3448
+    },
+    {
+      "id": "chapter-4862",
+      "title": "Đế Bá — Chương 4862: Hắc Bạch Lang Quân",
+      "url": "https://metruyenchu.com.vn/de-ba/chuong-4862-ijsG4Cdwi6sD",
+      "kind": "novel",
+      "chapter_position": 4858
+    },
+    {
+      "id": "chapter-5834",
+      "title": "Đế Bá — Chương 5834: Không có chuyện này",
+      "url": "https://metruyenchu.com.vn/de-ba/chuong-5834-sCSGEsAe1Cfb",
+      "kind": "novel",
+      "chapter_position": 5814
+    }
+  ],
+  "systems": [
+    {
+      "id": "de-ba-cuu-gioi",
+      "position": 0,
+      "title": "Cửu Giới",
+      "summary": "Hệ tu luyện đầu truyện. Các nhánh sau Đại Hiền được trình bày riêng, không tự coi mọi tôn xưng là một đại cảnh giới.",
+      "verification": "Đã đối chiếu bản truyện",
+      "source_ids": [
+        "chapter-14",
+        "chapter-369"
+      ],
+      "realms": [
+        {
+          "id": "de-ba-cuu-gioi-1",
+          "position": 0,
+          "name": "Khấu Cung Cảnh",
+          "detail": "Tiểu cảnh: Khấu Môn → Tỉnh Giác → Huyết Dũng.\n\nBước nhập môn, đánh thức tiềm năng và mở đầu việc tu luyện.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Khấu Cung"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-2",
+          "position": 1,
+          "name": "Thác Cương Cảnh",
+          "detail": "Tiểu cảnh: Trúc Công Pháp → Nạp Tinh Khí → Thác Cương Thổ.\n\nDựng nền công pháp, thu nạp tinh khí rồi mở rộng không gian tu luyện.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Thác Cương"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-3",
+          "position": 2,
+          "name": "Uẩn Thể Cảnh",
+          "detail": "Tiểu cảnh: Tráng Huyết → Thối Thể → Tẩy Lễ.\n\nBồi dưỡng khí huyết và rèn cơ thể để thích ứng với tu vi.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Uẩn Thể"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-4",
+          "position": 3,
+          "name": "Tịch Cung Cảnh",
+          "detail": "Tiểu cảnh: Cung Khởi → Dũng Tuyền → Nhiên Hỏa → Phá Thổ → Kình Trụ.\n\nKhai mở mệnh cung. Ảnh và bài tham khảo gọi Tịch Cung; bản truyện đang đọc dùng Ích Cung.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Ích Cung",
+            "Tịch Cung"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-5",
+          "position": 4,
+          "name": "Tráng Thọ Cảnh",
+          "detail": "Tiểu cảnh: Thối Bảo → Tụ Hoa → Kiêu Thọ.\n\nTiếp tục rèn thọ luân, tích lũy sinh cơ.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Tráng Thọ"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-6",
+          "position": 5,
+          "name": "Chân Mệnh Cảnh",
+          "detail": "Tiểu cảnh: Tế Chân Mệnh → Tác Chân Giải → Chuyển Áo Nghĩa → Hóa Đạo Pháp.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Chân Mệnh"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-7",
+          "position": 6,
+          "name": "Hoa Cái Cảnh",
+          "detail": "Tiểu cảnh: Thôn Yên Hà → Huyết Trùng Tiêu → Xán Mệnh Cung.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Hoa Cái"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-8",
+          "position": 7,
+          "name": "Niết Dục Cảnh",
+          "detail": "Tiểu cảnh: Thông Thể Phách → Dục Thể → Tấn Thân.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Niết Dục"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-9",
+          "position": 8,
+          "name": "Thiên Nguyên Cảnh",
+          "detail": "Tiểu cảnh: Khai Trí → Thối Mệnh → Trúc Kiều.",
+          "branch": "Cảnh giới cơ sở",
+          "aliases": [
+            "Thiên Nguyên"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-10",
+          "position": 9,
+          "name": "Dục Thần Cảnh",
+          "detail": "Tiểu cảnh: Dựng Thần → Uẩn Thần → Thông Thần → Hóa Thần.",
+          "branch": "Cảnh giới trung cao giai",
+          "aliases": [
+            "Dục Thần"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-11",
+          "position": 10,
+          "name": "Huyền Mệnh Cảnh",
+          "detail": "Gắn với việc tiếp tục mở mệnh cung. Cách gọi theo số cung cần đặt trong đúng bối cảnh, không phải một bảng quy đổi sức mạnh chung.",
+          "branch": "Cảnh giới trung cao giai",
+          "aliases": [
+            "Huyền Mệnh"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-12",
+          "position": 11,
+          "name": "Trích Tinh Cảnh",
+          "detail": "Lấy tinh thần làm mốc tu luyện; xem thêm các bậc và danh xưng trong phần truyện tương ứng.",
+          "branch": "Cảnh giới trung cao giai",
+          "aliases": [
+            "Trích Tinh"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-13",
+          "position": 12,
+          "name": "Cổ Thánh Cảnh",
+          "detail": "Các tên Tiểu Thánh, Thiếu Thánh, Đại Thánh xuất hiện trong phần Cửu Giới; số mệnh cung cũng làm thay đổi thành tựu.",
+          "branch": "Cảnh giới trung cao giai",
+          "aliases": [
+            "Cổ Thánh"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-14",
+          "position": 13,
+          "name": "Thánh Tôn Cảnh",
+          "detail": "Cấp cao của hệ Cửu Giới, sau Cổ Thánh và trước Thánh Hoàng trong bảng tra cứu.",
+          "branch": "Cảnh giới đỉnh cấp",
+          "aliases": [
+            "Thánh Tôn"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-15",
+          "position": 14,
+          "name": "Thánh Hoàng Cảnh",
+          "detail": "Bậc tu luyện trước Đại Hiền của hệ Cửu Giới.",
+          "branch": "Cảnh giới đỉnh cấp",
+          "aliases": [
+            "Thánh Hoàng"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-16",
+          "position": 15,
+          "name": "Đại Hiền Cảnh",
+          "detail": "Từ đây cần phân biệt các nhánh theo Thương Thiên đạo và Đại Thế đạo, thay vì cộng mọi danh xưng thành cấp liên tiếp.",
+          "branch": "Cảnh giới đỉnh cấp",
+          "aliases": [
+            "Đại Hiền"
+          ],
+          "source_ids": [
+            "chapter-14",
+            "chapter-369",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-17",
+          "position": 16,
+          "name": "Thiên Đạo Hiền",
+          "detail": "Nhánh Thương Thiên đạo của Đại Hiền.",
+          "branch": "Nhánh Đại Hiền",
+          "aliases": [],
+          "source_ids": [
+            "chapter-369"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-18",
+          "position": 17,
+          "name": "Phong Thần Hiền",
+          "detail": "Nhánh Đại Thế đạo của Đại Hiền.",
+          "branch": "Nhánh Đại Hiền",
+          "aliases": [],
+          "source_ids": [
+            "chapter-369"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-19",
+          "position": 18,
+          "name": "Thần Vương / Thần Hoàng",
+          "detail": "Các danh xưng và mức thành tựu cao được nhắc trong phần Cửu Giới; không gán số bậc quy đổi với giới vực khác.",
+          "branch": "Danh xưng cao giai",
+          "aliases": [],
+          "source_ids": [
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-cuu-gioi-20",
+          "position": 19,
+          "name": "Tiên Đế Cảnh",
+          "detail": "Gắn với việc gánh chịu Thiên Mệnh ở Cửu Giới.",
+          "branch": "Chính tuyến",
+          "aliases": [
+            "Tiên Đế"
+          ],
+          "source_ids": [
+            "chapter-14"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de-ba-thap-tam-chau",
+      "position": 1,
+      "title": "Đệ Thập Giới · Thập Tam Châu",
+      "summary": "Chương 1753 liệt kê 17 đại cảnh giới; 16 bậc đầu dùng lượng Hỗn Độn chi khí làm một thước đo. Thượng Thần là nhánh trình bày riêng.",
+      "verification": "Đã đối chiếu bản truyện",
+      "source_ids": [
+        "chapter-1753"
+      ],
+      "realms": [
+        {
+          "id": "de-ba-thap-tam-chau-1",
+          "position": 0,
+          "name": "Đạo Trần",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 100 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-2",
+          "position": 1,
+          "name": "Đạo Nghĩ",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 500 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-3",
+          "position": 2,
+          "name": "Đạo Trùng",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 1.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-4",
+          "position": 3,
+          "name": "Đạo Xà",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 5.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-5",
+          "position": 4,
+          "name": "Đạo Hổ",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 10.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-6",
+          "position": 5,
+          "name": "Đạo Đồng",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 50.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-7",
+          "position": 6,
+          "name": "Đạo Nhân",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 100.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-8",
+          "position": 7,
+          "name": "Đạo Sứ",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 500.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [
+            "Đạo Sử"
+          ],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-9",
+          "position": 8,
+          "name": "Đạo Sư",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 1.000.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-10",
+          "position": 9,
+          "name": "Đạo Hầu",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 2.000.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-11",
+          "position": 10,
+          "name": "Đạo Vương",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 5.000.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-12",
+          "position": 11,
+          "name": "Đạo Hoàng",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 8.000.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-13",
+          "position": 12,
+          "name": "Đạo Tôn",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 10.000.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-14",
+          "position": 13,
+          "name": "Đạo Hiền",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 30.000.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-15",
+          "position": 14,
+          "name": "Đạo Thánh",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 50.000.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-16",
+          "position": 15,
+          "name": "Đạo Thiên",
+          "detail": "Mốc Hỗn Độn chi khí được nêu: 100.000.000 đấu.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-17",
+          "position": 16,
+          "name": "Xưng Đế · Đại Đế / Tiên Vương",
+          "detail": "Từ đây truyện chuyển sang nói đến Thiên Mệnh, không dùng số đấu như các bậc trước.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-1753"
+          ]
+        },
+        {
+          "id": "de-ba-thap-tam-chau-18",
+          "position": 17,
+          "name": "Thượng Thần",
+          "detail": "Nhánh Đồ Đằng; bài tham khảo nêu từ 1 đến 12 Đồ Đằng.",
+          "branch": "Nhánh Thượng Thần",
+          "aliases": [],
+          "source_ids": [
+            "thuvienanime"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de-ba-tam-tien-gioi",
+      "position": 2,
+      "title": "Tam Tiên Giới",
+      "summary": "Chân Đồ gộp chín bậc đầu. Các mức của Chân Thần và con đường Chân Đế không được xếp thành một chuỗi tuyến tính duy nhất.",
+      "verification": "Đã đối chiếu phần cơ sở",
+      "source_ids": [
+        "chapter-2134"
+      ],
+      "realms": [
+        {
+          "id": "de-ba-tam-tien-gioi-1",
+          "position": 0,
+          "name": "Chân Đồ",
+          "detail": "Cấp 1–9.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-2",
+          "position": 1,
+          "name": "Chân Sĩ",
+          "detail": "Phân tiểu, trung, đại theo phần giới thiệu hệ thống.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-3",
+          "position": 2,
+          "name": "Chân Nhân",
+          "detail": "Phân tiểu, trung, đại theo phần giới thiệu hệ thống.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-4",
+          "position": 3,
+          "name": "Chân Kiệt",
+          "detail": "Phân tiểu, trung, đại theo phần giới thiệu hệ thống.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-5",
+          "position": 4,
+          "name": "Chân Hào",
+          "detail": "Phân tiểu, trung, đại theo phần giới thiệu hệ thống.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-6",
+          "position": 5,
+          "name": "Chân Hoàng",
+          "detail": "Phân tiểu, trung, đại theo phần giới thiệu hệ thống.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-7",
+          "position": 6,
+          "name": "Chân Thánh",
+          "detail": "Phân tiểu, trung, đại theo phần giới thiệu hệ thống.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-8",
+          "position": 7,
+          "name": "Chân Thần",
+          "detail": "Phân tiểu, trung, đại theo phần giới thiệu hệ thống.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-9",
+          "position": 8,
+          "name": "Đăng Thiên Chân Thần",
+          "detail": "Nhánh Chân Thần, tham khảo 1–9 trọng thiên.",
+          "branch": "Nhánh Chân Thần",
+          "aliases": [],
+          "source_ids": [
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-10",
+          "position": 9,
+          "name": "Bất Hủ Chân Thần",
+          "detail": "Nhánh Chân Thần; các tầng bất hủ không quy đổi trực tiếp sang số cung Chân Đế.",
+          "branch": "Nhánh Chân Thần",
+          "aliases": [],
+          "source_ids": [
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-11",
+          "position": 10,
+          "name": "Chân Đế",
+          "detail": "Con đường riêng; bài tham khảo phân theo 1–12 mệnh cung.",
+          "branch": "Nhánh Chân Đế",
+          "aliases": [],
+          "source_ids": [
+            "chapter-2134",
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-tam-tien-gioi-12",
+          "position": 11,
+          "name": "Thủy Tổ",
+          "detail": "Bài tham khảo gắn với Đạo Nguyên và các hệ Vạn Thống, Đế Thống, Tiên Thống; để riêng khỏi các tầng Chân Thần.",
+          "branch": "Nhánh Chân Đế",
+          "aliases": [],
+          "source_ids": [
+            "thuvienanime"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de-ba-bat-hoang",
+      "position": 3,
+      "title": "Bát Hoang",
+      "summary": "Chương 3248 trình bày 12 bậc của hệ mới. Chương 3450 nói rõ Thiên Tôn là con đường ngoài Đạo Quân, không phải bậc bắt buộc trước Đạo Quân.",
+      "verification": "Đã đối chiếu bản truyện",
+      "source_ids": [
+        "chapter-3248",
+        "chapter-3450"
+      ],
+      "realms": [
+        {
+          "id": "de-ba-bat-hoang-1",
+          "position": 0,
+          "name": "Phàm Thai Nhục Thân",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-2",
+          "position": 1,
+          "name": "Thiết Bì Cường Thể",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-3",
+          "position": 2,
+          "name": "Đồng Cân Nham Thể",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-4",
+          "position": 3,
+          "name": "Ngân Giáp Chiến Khu",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-5",
+          "position": 4,
+          "name": "Tử Hậu Cuồng Thể",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [
+            "Tử Hầu Cuồng Thể"
+          ],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-6",
+          "position": 5,
+          "name": "Vương Giả Bá Thể",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-7",
+          "position": 6,
+          "name": "Chân Nhân Bảo Thân",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-8",
+          "position": 7,
+          "name": "Tam Muội Chân Thân",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-9",
+          "position": 8,
+          "name": "Âm Dương Tinh Thể",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-10",
+          "position": 9,
+          "name": "Vạn Tượng Thần Khu",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-11",
+          "position": 10,
+          "name": "Đại Đạo Thánh Thể",
+          "detail": "",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-12",
+          "position": 11,
+          "name": "Đạo Quân Kim Thân",
+          "detail": "Còn gọi Đạo Quân.",
+          "branch": "Chính tuyến",
+          "aliases": [],
+          "source_ids": [
+            "chapter-3248",
+            "chapter-3450"
+          ]
+        },
+        {
+          "id": "de-ba-bat-hoang-13",
+          "position": 12,
+          "name": "Vạn Đạo Thiên Khu · Thiên Tôn",
+          "detail": "Nhánh khác sau Đại Đạo Thánh Thể. Không Gian Long Đế được nêu là người mở đường.",
+          "branch": "Nhánh Thiên Tôn",
+          "aliases": [
+            "Thiên Tôn"
+          ],
+          "source_ids": [
+            "chapter-3450"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de-ba-luc-thien-chau",
+      "position": 4,
+      "title": "Lục Thiên Châu",
+      "summary": "Phần truyện này có Thiên Tôn Long Quân và các danh xưng Đế Quân, Đạo Quân, Đại Đế, Tiên Vương. Bài tham khảo mô tả phần cơ sở chưa đủ rõ để dựng một thang bậc mới.",
+      "verification": "Tham khảo · chưa chuẩn hóa toàn hệ",
+      "source_ids": [
+        "chapter-4862",
+        "thuvienanime"
+      ],
+      "realms": [
+        {
+          "id": "de-ba-luc-thien-chau-1",
+          "position": 0,
+          "name": "Thiên Tôn Long Quân",
+          "detail": "Dùng như mốc tra cứu, không gán vị trí mạnh/yếu so với toàn bộ các tuyến Đế.",
+          "branch": "Mốc tra cứu",
+          "aliases": [
+            "Long Quân"
+          ],
+          "source_ids": [
+            "chapter-4862"
+          ]
+        },
+        {
+          "id": "de-ba-luc-thien-chau-2",
+          "position": 1,
+          "name": "Đế Quân / Đạo Quân / Đại Đế / Tiên Vương",
+          "detail": "Các danh xưng thuộc những con đường và bối cảnh khác nhau; không coi đây là bốn cấp bắt buộc nối tiếp.",
+          "branch": "Mốc tra cứu",
+          "aliases": [],
+          "source_ids": [
+            "thuvienanime"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de-ba-tan-tam-tien-gioi",
+      "position": 5,
+      "title": "Tân · Tam Tiên Giới",
+      "summary": "Bài tham khảo lặp nhiều tên của hệ Tam Tiên Giới. Giữ tách bối cảnh; không lặp chúng thành một thang cảnh giới mới đã được xác nhận.",
+      "verification": "Tham khảo · cần đối chiếu thêm",
+      "source_ids": [
+        "thuvienanime",
+        "chapter-5834"
+      ],
+      "realms": [
+        {
+          "id": "de-ba-tan-tam-tien-gioi-1",
+          "position": 0,
+          "name": "Chân Đồ → Chân Thần / Chân Đế",
+          "detail": "Xem nhóm Tam Tiên Giới để tra các tên cơ sở; việc xuất hiện lại không chứng minh toàn bộ các mốc hoàn toàn tương đương.",
+          "branch": "Tên gọi được tham khảo",
+          "aliases": [],
+          "source_ids": [
+            "thuvienanime"
+          ]
+        },
+        {
+          "id": "de-ba-tan-tam-tien-gioi-2",
+          "position": 1,
+          "name": "Nguyên Tổ",
+          "detail": "Có tên gọi trong phần truyện sau; chưa đưa vào một chuỗi chuyển cảnh giới cố định ở bảng này.",
+          "branch": "Tên gọi được đối chiếu",
+          "aliases": [],
+          "source_ids": [
+            "chapter-5834"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "de-ba-thien-canh",
+      "position": 6,
+      "title": "Thiên Cảnh",
+      "summary": "Bài tham khảo mô tả bằng các tên Đạo cảnh quen thuộc nhưng chưa đủ dẫn chứng để chốt thứ tự và quy đổi ở giai đoạn cuối. Không suy diễn một bảng tu vi hoàn chỉnh.",
+      "verification": "Tham khảo · chưa xác nhận thứ bậc",
+      "source_ids": [
+        "thuvienanime"
+      ],
+      "realms": [
+        {
+          "id": "de-ba-thien-canh-1",
+          "position": 0,
+          "name": "Các Đạo cảnh / Xưng Đế",
+          "detail": "Chỉ là nhóm tên bài tham khảo nhắc đến, không phải thứ tự cuối cùng đã được kiểm chứng.",
+          "branch": "Ghi chú nguồn",
+          "aliases": [],
+          "source_ids": [
+            "thuvienanime"
+          ]
+        }
+      ]
+    }
+  ]
+}

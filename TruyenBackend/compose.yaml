@@ -1,0 +1,84 @@
+name: moc-truyen
+x-backend: &backend
+  image: moc-truyen-api:local
+  environment: &environment
+    DATABASE_URL: postgresql+asyncpg://moc:${POSTGRES_PASSWORD:?Run CHAY_DOCKER.bat first}@db:5432/moc
+    CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:5178","http://127.0.0.1:5178"]}
+services:
+  db:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_USER: moc
+      POSTGRES_DB: moc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run CHAY_DOCKER.bat first}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  migrate:
+    <<: *backend
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    depends_on:
+      db: {condition: service_healthy}
+  seed:
+    <<: *backend
+    command: ["sh", "-c", "python -m app.commands.seed /seed/books && python -m app.commands.seed_cultivation"]
+    volumes:
+      - ../TruyenWeb/public/books:/seed/books:ro
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  api:
+    <<: *backend
+    build:
+      context: .
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      seed: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  web:
+    image: moc-truyen-web:local
+    build:
+      context: ../TruyenWeb
+      dockerfile: ../TruyenBackend/docker/web.Dockerfile
+      additional_contexts:
+        dockerconfig: ./docker
+    ports:
+      - "${WEB_PORT:-5178}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  db-test:
+    image: postgres:16-bookworm
+    profiles: [test]
+    environment:
+      POSTGRES_USER: moc
+      POSTGRES_DB: moc_test
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moc -d moc_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  tests:
+    <<: *backend
+    profiles: [test]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://moc:${POSTGRES_PASSWORD}@db-test:5432/moc_test
+    command: ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider"]
+    depends_on:
+      db-test: {condition: service_healthy}
+volumes:
+  postgres_data:

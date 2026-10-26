@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="vi" data-theme="paper">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="%BASE_URL%brand/favicon.png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%brand/icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#315B46" />
+    <meta
+      name="description"
+      content="Mộc · Không gian đọc truyện của bạn. Đọc chậm, đi thật xa. Lưu vị trí đọc, đánh dấu chương và chọn màu trang yêu thích."
+    />
+    <title>Mộc · Không gian đọc truyện</title>
+    <script>
+      try {
+        const theme = JSON.parse(localStorage.getItem('moc-web-reader-v1') || '{}').preferences
+          ?.theme;
+        if (['paper', 'sepia', 'night'].includes(theme))
+          document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

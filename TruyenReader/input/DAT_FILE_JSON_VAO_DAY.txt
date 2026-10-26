@@ -1,0 +1,4 @@
+Chờ tool tải hoàn tất. Chép file truyen.json vào chính thư mục này.
+Ví dụ: C:\TruyenReader\input\truyen.json
+Sau đó chạy BUILD_APK.bat ở thư mục C:\TruyenReader.
+Không dùng bao_cao.json, muc_luc.json hoặc file JSON của một chương riêng.

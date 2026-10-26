@@ -1,0 +1,2 @@
+Them JSON truyen vao day, moi truyen mot file. Chay CHAY_WEB.bat de cap nhat.
+Truyen hien co trong app duoc nap tu dong.

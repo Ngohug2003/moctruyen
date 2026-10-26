@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mộc Python Backend"
+  short_description: "Build Mộc APIs using reviewed HappyVow conventions"
+  default_prompt: "Use $moc-python-backend to implement the requested Mộc API following the folder rules and reviewed HappyVow base."

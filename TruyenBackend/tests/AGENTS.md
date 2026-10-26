@@ -1,0 +1,3 @@
+# Behavioral validation
+
+At runtime setup, use pytest/async support and an isolated DB; mock external calls for HTTP/service tests. Include actual envelope/status, validation, 401/403, bad subjects, account status, owner isolation, DB conflicts, rollback and bounded ordered pagination. PostgreSQL-specific SQL, concurrency and migrations need PostgreSQL tests; SQLite/mocks are not substitutes. Import tests include duplicate-number parts, URL conflicts, Unicode/legacy ID equivalence and preservation of progress. Never point tests at the deployment DB. Current phase contains rules only, not a passing application suite.
