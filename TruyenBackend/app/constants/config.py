@@ -19,6 +19,8 @@ class Settings(BaseSettings):
                 v = "postgresql+asyncpg://" + v[len("postgres://") :]
             elif v.startswith("postgresql://"):
                 v = "postgresql+asyncpg://" + v[len("postgresql://") :]
+            # asyncpg requires ssl= instead of sslmode=
+            v = v.replace("sslmode=", "ssl=")
         return v
 
     @field_validator("cors_origins", mode="before")
