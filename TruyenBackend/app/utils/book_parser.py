@@ -120,7 +120,7 @@ def parse_txt(text: str, filename: str = "", custom_title: str | None = None) ->
 
     for pos, (c_num, c_title, c_body_lines) in enumerate(raw_chapters):
         c_content = "\n".join(c_body_lines).strip()
-        identity = f"{c_num}\u001f{c_title}\u001f{c_content}"
+        identity = f"{book_id}\u001f{c_num}\u001f{c_title}\u001f{c_content}"
         c_id = stable_id(identity)
         if c_id in seen_ids:
             # Fallback identity with position to ensure chapter ID uniqueness in case of duplicate content
@@ -167,7 +167,7 @@ def parse_json(text: str, custom_title: str | None = None) -> ParsedBook:
         c_content = str(item.get("noi_dung", "")).replace("\r\n", "\n").replace("\r", "\n").strip()
         url = str(item.get("url", "")).strip()
 
-        identity = url or f"{c_num}\u001f{c_title}\u001f{c_content}"
+        identity = f"{book_id}\u001f{url}" if url else f"{book_id}\u001f{c_num}\u001f{c_title}\u001f{c_content}"
         c_id = stable_id(identity)
         if c_id in seen_ids:
             c_id = stable_id(f"{identity}\u001f{pos}")

@@ -35,6 +35,8 @@ services:
     <<: *backend
     build:
       context: .
+    volumes:
+      - ../TruyenWeb/public/books:/seed/books:rw
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:
@@ -52,6 +54,8 @@ services:
       dockerfile: ../TruyenBackend/docker/web.Dockerfile
       additional_contexts:
         dockerconfig: ./docker
+    volumes:
+      - ../TruyenWeb/public/books:/usr/share/nginx/html/books:ro
     ports:
       - "${WEB_PORT:-5178}:80"
     healthcheck:

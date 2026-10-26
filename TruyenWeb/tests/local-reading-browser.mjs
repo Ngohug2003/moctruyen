@@ -33,7 +33,7 @@ try {
         );
       });
     await page.goto(url);
-    await expect(page.locator('.book-card')).toHaveCount(1, { timeout: 15000 });
+    await expect(page.locator('.book-card')).toHaveCount(2, { timeout: 15000 });
     if (signedIn)
       await expect(
         page.getByRole('button', { name: 'Bạn đọc offline', exact: true }),

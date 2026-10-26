@@ -51,7 +51,7 @@ export function UploadBookModal({
         '/admin/books/preview',
         formData,
         'POST',
-        60000,
+        180000,
       );
       setPreview(data);
       if (!title.trim() && data.title) {
@@ -79,127 +79,164 @@ export function UploadBookModal({
         '/admin/books/upload',
         formData,
         'POST',
-        120000,
+        240000,
       );
       setResult(data);
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Lỗi khi lưu truyện vào database.');
+      setError(err instanceof Error ? err.message : 'Lỗi khi lưu truyện vào hệ thống.');
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <Modal title="Thêm truyện vào hệ thống" onClose={onClose} drawer>
-      <div className="upload-book-modal">
+    <Modal title="Thêm truyện vào thư viện" onClose={onClose} drawer={false}>
+      <div className="upload-modal-container">
         {!isLoggedIn && (
-          <div className="inline-notice warning" role="alert">
-            <AlertCircle size={18} />
-            <span>
-              Bạn chưa đăng nhập. Tính năng tải truyện yêu cầu đăng nhập tài khoản ở góc trên bên
-              phải.
-            </span>
+          <div className="upload-alert-warning" role="alert">
+            <AlertCircle size={20} className="alert-icon" />
+            <div>
+              <strong>Lưu ý:</strong> Bạn cần đăng nhập tài khoản trước khi tải truyện (dùng nút ở
+              góc trên bên phải màn hình).
+            </div>
           </div>
         )}
 
         {error && (
-          <div className="inline-notice error" role="alert">
-            <AlertCircle size={18} />
-            <span>{error}</span>
+          <div className="upload-alert-error" role="alert">
+            <AlertCircle size={20} className="alert-icon" />
+            <div>{error}</div>
           </div>
         )}
 
         {result ? (
-          <div className="upload-success-panel">
-            <div className="success-icon">
-              <CheckCircle2 size={44} color="#4b785a" />
+          <div className="upload-success-container">
+            <div className="success-badge-icon">
+              <CheckCircle2 size={52} />
             </div>
-            <h3>Lưu truyện thành công!</h3>
-            <p className="success-message">{result.message}</p>
-            <div className="summary-meta">
-              <div>
-                <strong>Mã truyện:</strong> <code>{result.id}</code>
+            <h3 className="success-heading">Đã lưu truyện thành công!</h3>
+            <p className="success-subheading">
+              Truyện đã được cập nhật vào danh mục thư viện và sẵn sàng để bạn đọc ngay.
+            </p>
+
+            <div className="success-meta-card">
+              <div className="meta-row">
+                <span className="meta-label">Tên truyện:</span>
+                <strong className="meta-value">{result.title}</strong>
               </div>
-              <div>
-                <strong>Tên truyện:</strong> {result.title}
+              <div className="meta-row">
+                <span className="meta-label">Tổng số chương:</span>
+                <span className="meta-value highlight">{number(result.total)} chương</span>
               </div>
-              <div>
-                <strong>Tổng số chương:</strong> {number(result.total)}
+              <div className="meta-row">
+                <span className="meta-label">Mã định danh:</span>
+                <code className="meta-code">{result.id}</code>
               </div>
-              <div>
-                <strong>Thời gian xử lý:</strong> {result.duration_seconds}s
+              <div className="meta-row">
+                <span className="meta-label">Thời gian lưu:</span>
+                <span className="meta-value">{result.duration_seconds} giây</span>
               </div>
             </div>
-            <div className="modal-actions">
-              <button className="button primary" onClick={onClose}>
-                Xem trong thư viện
-                <ArrowRight size={17} />
+
+            <div className="modal-footer-actions">
+              <button
+                className="button primary btn-large"
+                onClick={() => {
+                  onSuccess();
+                  onClose();
+                }}
+              >
+                Mở Thư viện đọc ngay
+                <ArrowRight size={18} />
               </button>
             </div>
           </div>
         ) : !preview ? (
-          <div className="upload-step-select">
-            <div className="form-group">
-              <label htmlFor="book-file" className="form-label">
-                <strong>1. Chọn file truyện (.txt hoặc .json)</strong>
+          <div className="upload-step-body">
+            <p className="step-intro-text">
+              Chọn file truyện (.txt hoặc .json) để hệ thống tự động bóc tách chương, chuẩn hóa nội
+              dung và hiển thị bản xem trước cho bạn kiểm tra.
+            </p>
+
+            <div className="form-field-group">
+              <label className="field-label" htmlFor="novel-file-input">
+                1. File tiểu thuyết nguồn (.txt hoặc .json)
               </label>
-              <div className="file-input-wrapper">
+
+              <div
+                className={`dropzone-card ${file ? 'has-file' : ''}`}
+                onClick={() => document.getElementById('novel-file-input')?.click()}
+              >
                 <input
-                  id="book-file"
+                  id="novel-file-input"
                   type="file"
                   accept=".txt,.json"
+                  className="hidden-file-input"
                   onChange={(e) => {
                     const selected = e.target.files?.[0] || null;
                     setFile(selected);
                     setError('');
                   }}
                 />
-                {file && (
-                  <div className="file-info">
-                    <FileText size={18} />
-                    <span className="file-name">{file.name}</span>
-                    <span className="file-size">({(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
+
+                {file ? (
+                  <div className="selected-file-display">
+                    <FileText size={32} className="file-svg-icon" />
+                    <div className="file-details">
+                      <span className="file-title-text">{file.name}</span>
+                      <span className="file-size-badge">
+                        Dung lượng: {(file.size / (1024 * 1024)).toFixed(2)} MB
+                      </span>
+                    </div>
+                    <span className="change-file-pill">Bấm để đổi file khác</span>
+                  </div>
+                ) : (
+                  <div className="empty-dropzone-prompt">
+                    <Upload size={36} className="upload-svg-icon" />
+                    <span className="prompt-primary">Bấm vào đây để chọn file từ máy tính</span>
+                    <span className="prompt-secondary">
+                      Hỗ trợ file text phân chương hoặc file JSON crawl (tối đa 250MB)
+                    </span>
                   </div>
                 )}
               </div>
-              <small className="help-text">
-                Hỗ trợ file text có cấu trúc &ldquo;Thứ 1 chương...&rdquo;, &ldquo;Chương
-                1...&rdquo; hoặc file JSON mảng chương crawl.
-              </small>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="book-title" className="form-label">
-                <strong>2. Tên truyện (Tùy chọn)</strong>
+            <div className="form-field-group">
+              <label className="field-label" htmlFor="novel-custom-title">
+                2. Tên truyện (Tùy chọn)
               </label>
               <input
-                id="book-title"
-                className="text-input"
+                id="novel-custom-title"
+                className="custom-text-input"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Để trống để tự động nhận diện từ file"
+                placeholder="Để trống nếu muốn tự động lấy tên từ file"
               />
+              <span className="field-hint">
+                Nếu để trống, hệ thống sẽ tự động trích xuất tên truyện từ tiêu đề bên trong file.
+              </span>
             </div>
 
-            <div className="modal-actions">
+            <div className="modal-footer-actions">
               <button className="button secondary" onClick={onClose} disabled={loading}>
                 Đóng
               </button>
               <button
-                className="button primary"
+                className="button primary btn-highlight"
                 onClick={handlePreview}
                 disabled={!file || loading || !isLoggedIn}
               >
                 {loading ? (
                   <>
-                    <LoaderCircle className="spinner" size={17} />
-                    Đang phân tích file…
+                    <LoaderCircle className="spinner" size={18} />
+                    Đang bóc tách & phân tích file…
                   </>
                 ) : (
                   <>
-                    <Eye size={17} />
+                    <Eye size={18} />
                     Xem trước (Preview)
                   </>
                 )}
@@ -207,63 +244,65 @@ export function UploadBookModal({
             </div>
           </div>
         ) : (
-          <div className="upload-step-preview">
-            <div className="preview-summary-card">
-              <div className="preview-title-row">
-                <div className="form-group flex-1">
-                  <label htmlFor="edit-title" className="form-label">
-                    <strong>Tên truyện:</strong>
-                  </label>
-                  <input
-                    id="edit-title"
-                    className="text-input"
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
+          <div className="upload-step-body">
+            <div className="preview-header-box">
+              <div className="preview-title-field">
+                <label className="field-label" htmlFor="novel-edit-title">
+                  Tên truyện hiển thị:
+                </label>
+                <input
+                  id="novel-edit-title"
+                  className="custom-text-input large-title-input"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+
+              <div className="preview-metrics-grid">
+                <div className="metric-card">
+                  <span className="metric-number">{number(preview.total)}</span>
+                  <span className="metric-tag">CHƯƠNG PHÁT HIỆN</span>
                 </div>
-                <div className="preview-stats-badge">
-                  <strong>{number(preview.total)}</strong>
-                  <span>CHƯƠNG TÌM THẤY</span>
+                <div className="metric-card">
+                  <span className="metric-number">{preview.duration_seconds}s</span>
+                  <span className="metric-tag">TỐC ĐỘ PHÂN TÍCH</span>
                 </div>
               </div>
 
-              <div className="preview-meta-row">
-                <span>
-                  Mã ID: <code>{preview.id}</code>
-                </span>
-                <span>Thời gian bóc tách: {preview.duration_seconds}s</span>
-              </div>
-
-              <label className="checkbox-row">
+              <label className="overwrite-toggle-card">
                 <input
                   type="checkbox"
                   checked={overwrite}
                   onChange={(e) => setOverwrite(e.target.checked)}
                 />
-                <span>Ghi đè nội dung nếu truyện đã tồn tại (Overwrite)</span>
+                <span className="toggle-label-text">
+                  Ghi đè nội dung nếu bộ truyện này đã tồn tại trong hệ thống (Overwrite)
+                </span>
               </label>
             </div>
 
-            <div className="sample-chapters-section">
-              <h4>Mẫu các chương đầu ({preview.first_chapters.length} chương):</h4>
-              <div className="chapters-list">
+            <div className="preview-samples-box">
+              <div className="sample-block-title">
+                MẪU CÁC CHƯƠNG ĐẦU ({preview.first_chapters.length} CHƯƠNG):
+              </div>
+              <div className="sample-chapter-stack">
                 {preview.first_chapters.map((ch) => (
-                  <div key={ch.position} className="chapter-preview-item">
-                    <div className="chapter-preview-header">
-                      <span className="chapter-pos">#{ch.position + 1}</span>
-                      <strong className="chapter-title">{ch.title}</strong>
+                  <div key={ch.position} className="sample-chapter-card">
+                    <div className="chapter-meta-line">
+                      <span className="chapter-badge">Chương #{ch.number}</span>
+                      <strong className="chapter-heading-text">{ch.title}</strong>
                     </div>
-                    <p className="chapter-excerpt">{ch.excerpt}</p>
+                    <p className="chapter-snippet-text">{ch.excerpt}</p>
                   </div>
                 ))}
               </div>
 
               {preview.last_chapters.length > 0 && (
                 <>
-                  <div className="chapters-divider">
+                  <div className="middle-chapters-separator">
                     <span>
-                      …{' '}
+                      … và{' '}
                       {number(
                         preview.total -
                           preview.first_chapters.length -
@@ -272,15 +311,16 @@ export function UploadBookModal({
                       chương ở giữa …
                     </span>
                   </div>
-                  <h4>Mẫu các chương cuối:</h4>
-                  <div className="chapters-list">
+
+                  <div className="sample-block-title">MẪU CÁC CHƯƠNG CUỐI:</div>
+                  <div className="sample-chapter-stack">
                     {preview.last_chapters.map((ch) => (
-                      <div key={ch.position} className="chapter-preview-item">
-                        <div className="chapter-preview-header">
-                          <span className="chapter-pos">#{ch.position + 1}</span>
-                          <strong className="chapter-title">{ch.title}</strong>
+                      <div key={ch.position} className="sample-chapter-card">
+                        <div className="chapter-meta-line">
+                          <span className="chapter-badge">Chương #{ch.number}</span>
+                          <strong className="chapter-heading-text">{ch.title}</strong>
                         </div>
-                        <p className="chapter-excerpt">{ch.excerpt}</p>
+                        <p className="chapter-snippet-text">{ch.excerpt}</p>
                       </div>
                     ))}
                   </div>
@@ -288,29 +328,29 @@ export function UploadBookModal({
               )}
             </div>
 
-            <div className="modal-actions">
+            <div className="modal-footer-actions">
               <button
                 className="button secondary"
                 onClick={() => setPreview(null)}
                 disabled={saving}
               >
                 <RefreshCw size={16} />
-                Chọn lại file
+                Chọn lại file khác
               </button>
               <button
-                className="button primary"
+                className="button primary btn-highlight"
                 onClick={handleConfirmSave}
                 disabled={saving || !isLoggedIn}
               >
                 {saving ? (
                   <>
-                    <LoaderCircle className="spinner" size={17} />
+                    <LoaderCircle className="spinner" size={18} />
                     Đang lưu vào database…
                   </>
                 ) : (
                   <>
-                    <Upload size={17} />
-                    Xác nhận Lưu vào DB
+                    <Upload size={18} />
+                    Xác nhận Lưu vào Hệ Thống
                   </>
                 )}
               </button>

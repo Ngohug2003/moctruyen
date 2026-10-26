@@ -26,7 +26,7 @@ page.on('request', (request) => {
 try {
   await page.goto(url);
   await expect(page.getByRole('heading', { name: 'Thư viện của bạn', exact: true })).toBeVisible();
-  await expect(page.locator('.book-card')).toHaveCount(1);
+  await expect(page.locator('.book-card')).toHaveCount(2);
   expect(requests.filter((path) => path.includes('.book'))).toHaveLength(0);
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: resolve(output, 'desktop-library.png'), fullPage: true });
@@ -117,13 +117,13 @@ try {
   });
   mobile.on('pageerror', (error) => errors.push(error.message));
   await mobile.goto(url);
-  await expect(mobile.locator('.book-card')).toHaveCount(1);
+  await expect(mobile.locator('.book-card')).toHaveCount(2);
   expect(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
     true,
   );
   await mobile.evaluate(() => document.fonts.ready);
   await mobile.screenshot({ path: resolve(output, 'mobile-library.png'), fullPage: true });
-  await mobile.getByRole('button', { name: 'Bắt đầu đọc', exact: true }).click();
+  await mobile.getByRole('button', { name: 'Bắt đầu đọc', exact: true }).first().click();
   await expect(mobile.locator('.chapter-content p').first()).toBeVisible();
   expect(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
     true,
