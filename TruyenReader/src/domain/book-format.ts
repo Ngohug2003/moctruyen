@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS seed_imports (version TEXT PRIMARY KEY);
 
 export const APPLY_BUNDLED_BOOK_SQL = `
 DELETE FROM chapters WHERE book_id IN (SELECT id FROM bundled.books);
-INSERT OR REPLACE INTO books SELECT * FROM bundled.books;
-INSERT INTO chapters SELECT * FROM bundled.chapters;
+INSERT OR REPLACE INTO books (id, title, total, source, updated_at) SELECT id, title, total, source, updated_at FROM bundled.books;
+INSERT INTO chapters (id, book_id, position, number, title, content, url, search_title) SELECT id, book_id, position, number, title, content, url, search_title FROM bundled.chapters;
 DELETE FROM bookmarks WHERE NOT EXISTS (SELECT 1 FROM chapters c WHERE c.book_id=bookmarks.book_id AND c.id=bookmarks.chapter_id);
 `;

@@ -118,7 +118,7 @@ export async function initialize(seed: SQLiteDatabase) {
   library = await openDatabaseAsync('moc-library.db');
   await library.execAsync('PRAGMA journal_mode = WAL; ' + SCHEMA);
   try {
-    await library.execAsync('ALTER TABLE books ADD COLUMN version TEXT DEFAULT ""');
+    await library.execAsync("ALTER TABLE books ADD COLUMN version TEXT DEFAULT ''");
   } catch {}
   await library.execAsync(
     'CREATE TABLE IF NOT EXISTS account_progress (user_id TEXT NOT NULL, book_id TEXT NOT NULL, chapter_id TEXT NOT NULL, offset REAL NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY(user_id,book_id))',
@@ -141,11 +141,15 @@ export async function initialize(seed: SQLiteDatabase) {
           await tx.runAsync('INSERT INTO seed_imports(version) VALUES (?)', `chunks-v1:${meta.hash}`);
         });
       } finally {
-        await library.execAsync('DETACH DATABASE bundled');
+        try {
+          await library.execAsync('DETACH DATABASE bundled');
+        } catch {}
       }
     }
   }
-  await library.withTransactionAsync(() => library.execAsync(REMOVE_LEGACY_SAMPLE_SQL));
+  try {
+    await library.withTransactionAsync(() => library.execAsync(REMOVE_LEGACY_SAMPLE_SQL));
+  } catch {}
 }
 
 export async function syncRemoteCatalog(): Promise<void> {
