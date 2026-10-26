@@ -12,5 +12,5 @@ const secure = {
 export const cloud = createCloud(
   storage,
   secure,
-  process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.4:8000',
+  process.env.EXPO_PUBLIC_API_URL || 'https://moctruyen.onrender.com',
 );

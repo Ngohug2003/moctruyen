@@ -29,8 +29,17 @@ export class ApiError extends Error {
     this.status = status;
   }
 }
+export function cleanApiBase(url: string): string {
+  let cleaned = url.trim().replace(/\/+$/, '');
+  const idx = cleaned.indexOf('/api/v1');
+  if (idx !== -1) {
+    cleaned = cleaned.substring(0, idx);
+  }
+  return cleaned.replace(/\/+$/, '');
+}
+
 export function createCloud(storage: Storage, credentials: Storage, defaultUrl: string) {
-  let baseUrl = defaultUrl;
+  let baseUrl = cleanApiBase(defaultUrl);
   let session: { token: string; user: Account } | null = null;
   let revision: Record<string, number> = {};
   let pending: Record<string, Update> = {};
@@ -125,7 +134,8 @@ export function createCloud(storage: Storage, credentials: Storage, defaultUrl: 
     return running;
   }
   async function init() {
-    baseUrl = (await storage.get('moc-api-url')) || defaultUrl;
+    const saved = await storage.get('moc-api-url');
+    baseUrl = saved ? cleanApiBase(saved) : cleanApiBase(defaultUrl);
     try {
       session = JSON.parse((await credentials.get('moc-session')) || 'null');
     } catch {
@@ -196,7 +206,7 @@ export function createCloud(storage: Storage, credentials: Storage, defaultUrl: 
       const parsed = new URL(url);
       if (!['http:', 'https:'].includes(parsed.protocol))
         throw new Error('Địa chỉ API phải dùng http hoặc https.');
-      baseUrl = url.replace(/\/$/, '');
+      baseUrl = cleanApiBase(url);
       await storage.set('moc-api-url', baseUrl);
     },
     async queue(bookId: string, update: Omit<Update, 'expected_revision'>) {

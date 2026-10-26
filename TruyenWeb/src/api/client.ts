@@ -29,8 +29,17 @@ export class ApiError extends Error {
     this.status = status;
   }
 }
+export function cleanApiBase(url: string): string {
+  let cleaned = url.trim().replace(/\/+$/, '');
+  const idx = cleaned.indexOf('/api/v1');
+  if (idx !== -1) {
+    cleaned = cleaned.substring(0, idx);
+  }
+  return cleaned.replace(/\/+$/, '');
+}
+
 export function createCloud(storage: Storage, credentials: Storage, defaultUrl: string) {
-  let baseUrl = defaultUrl;
+  let baseUrl = cleanApiBase(defaultUrl);
   let session: { token: string; user: Account } | null = null;
   let revision: Record<string, number> = {};
   let pending: Record<string, Update> = {};

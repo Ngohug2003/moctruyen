@@ -2,7 +2,7 @@ node_modules/
 .expo/
 android/
 ios/
-build/
+/build/
 build-check/
 input/*.json
 assets/content/

@@ -12,7 +12,10 @@
       "node": "24.16.0",
       "developmentClient": false,
       "environment": "preview",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://moctruyen.onrender.com"
+      }
     },
     "production": {
       "android": {
