@@ -3,6 +3,7 @@ from typing import Any
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine.url import make_url
 
 
 class Settings(BaseSettings):
@@ -15,12 +16,24 @@ class Settings(BaseSettings):
     def assemble_db_connection(cls, v: Any) -> str:
         if isinstance(v, str):
             v = v.strip()
-            if v.startswith("postgres://"):
-                v = "postgresql+asyncpg://" + v[len("postgres://") :]
-            elif v.startswith("postgresql://"):
-                v = "postgresql+asyncpg://" + v[len("postgresql://") :]
-            # asyncpg requires ssl= instead of sslmode=
-            v = v.replace("sslmode=", "ssl=")
+            try:
+                if v.startswith("postgres://"):
+                    v = "postgresql://" + v[len("postgres://") :]
+                u = make_url(v)
+                if u.drivername in ("postgres", "postgresql"):
+                    u = u.set(drivername="postgresql+asyncpg")
+                if "asyncpg" in u.drivername:
+                    query = dict(u.query)
+                    if "sslmode" in query:
+                        mode = query.pop("sslmode")
+                        if mode in ("require", "verify-ca", "verify-full"):
+                            query["ssl"] = "require"
+                    allowed = {"ssl", "timeout", "command_timeout", "server_settings"}
+                    clean_query = {k: val for k, val in query.items() if k in allowed}
+                    u = u.set(query=clean_query)
+                return u.render_as_string(hide_password=False)
+            except Exception:
+                return v
         return v
 
     @field_validator("cors_origins", mode="before")
