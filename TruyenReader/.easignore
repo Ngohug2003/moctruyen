@@ -2,17 +2,18 @@ node_modules/
 .expo/
 android/
 ios/
-build-check/
+/build-check/
 tests/
 *.apk
 *.aab
 
-input/
-build/
-backups/
+/input/
+/build/
+/backups/
 *.tmp
 
 .env
 .env.*
 !.env.example
-.agents/
+/.agents/
+
