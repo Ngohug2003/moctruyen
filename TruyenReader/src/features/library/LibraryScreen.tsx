@@ -49,6 +49,7 @@ export function LibraryScreen() {
   const readerSession = useRef<ReadingSession | null>(null);
   const p = palettes[settings.theme];
   const refresh = useCallback(async () => {
+    await db.syncRemoteCatalog();
     setBooks(await db.listBooks());
   }, []);
   useEffect(
@@ -87,6 +88,11 @@ export function LibraryScreen() {
         if (!active) return;
         setBooks(items);
         setSettings(readerSettings);
+        return db.syncRemoteCatalog();
+      })
+      .then(() => db.listBooks())
+      .then((updated) => {
+        if (active) setBooks(updated);
       })
       .catch((e) => {
         if (active) Alert.alert('Không mở được thư viện', errorMessage(e));
@@ -363,7 +369,9 @@ export function LibraryScreen() {
                     >
                       <Cover title={b.title} />
                       <View style={s.bookInfo}>
-                        <Text style={[s.bookTag, { color: p.accent }]}>TRUYỆN CHỮ</Text>
+                        <Text style={[s.bookTag, { color: p.accent }]}>
+                          {b.source === 'cloud' ? 'MỤC LỤC CLOUD' : 'TRUYỆN CHỮ'}
+                        </Text>
                         <Text style={[s.bookName, { color: p.text }]} numberOfLines={3}>
                           {b.title}
                         </Text>

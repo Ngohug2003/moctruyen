@@ -15,10 +15,17 @@ import { fileURLToPath } from 'node:url';
 import { SCHEMA, parseBookText } from '../../src/domain/book-format.ts';
 
 export function createBundle(inputPath, outputDir) {
-  if (!existsSync(inputPath))
+  const catalogDb = resolve(outputDir, 'catalog.db');
+  const bookMeta = resolve(outputDir, 'book-meta.json');
+  if (!existsSync(inputPath)) {
+    if (existsSync(catalogDb) && existsSync(bookMeta)) {
+      console.log('Dùng dữ liệu hiện có trong assets/ (bỏ qua input/truyen.json vì ưu tiên API).');
+      return JSON.parse(readFileSync(bookMeta, 'utf8'));
+    }
     throw new Error(
       `Chưa có ${inputPath}. Hãy chờ tải xong, chép truyen.json vào thư mục input rồi build lại.`,
     );
+  }
   const text = readFileSync(inputPath, 'utf8');
   const book = parseBookText(text);
   const hash = createHash('sha256').update(text).digest('hex').slice(0, 20);

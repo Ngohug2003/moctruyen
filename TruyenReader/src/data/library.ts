@@ -2,7 +2,7 @@ import { readLocalFirst } from '../domain/read-source';
 import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import meta from '../../assets/book-meta.json';
 import { cloud } from '../api/cloud';
-import { APPLY_BUNDLED_BOOK_SQL, SCHEMA, type NormalizedBook } from '../domain/book-format';
+import { APPLY_BUNDLED_BOOK_SQL, SCHEMA, fold, type NormalizedBook } from '../domain/book-format';
 import { CHAPTER_PAGE_SIZE, chapterPageQuery } from '../domain/chapter-query';
 import { REMOVE_LEGACY_SAMPLE_SQL } from '../domain/library-cleanup';
 import { getBundledContent } from './bundled-content';
@@ -51,6 +51,7 @@ export async function initialize(seed: SQLiteDatabase) {
   await cloud.init();
   cloud.receive(applyRemote);
   void cloud.sync();
+  void syncRemoteCatalog();
   const imported = await library.getFirstAsync(
     'SELECT version FROM seed_imports WHERE version=?',
     `chunks-v1:${meta.hash}`,
@@ -70,24 +71,57 @@ export async function initialize(seed: SQLiteDatabase) {
   await library.withTransactionAsync(() => library.execAsync(REMOVE_LEGACY_SAMPLE_SQL));
 }
 
+export async function syncRemoteCatalog(): Promise<void> {
+  try {
+    const remote = await cloud.request<{
+      items: Array<{ id: string; title: string; total: number; version: string }>;
+      total: number;
+    }>('/public/books?page_size=100', undefined, 'GET', 4000);
+    if (remote && Array.isArray(remote.items)) {
+      await library.withTransactionAsync(async () => {
+        for (const b of remote.items) {
+          const existing = await library.getFirstAsync<{ id: string; total: number; title: string }>(
+            'SELECT id, total, title FROM books WHERE id=?',
+            b.id,
+          );
+          if (!existing) {
+            await library.runAsync(
+              'INSERT INTO books(id,title,total,source,updated_at) VALUES (?,?,?,?,?)',
+              b.id,
+              b.title,
+              b.total,
+              'cloud',
+              new Date().toISOString(),
+            );
+          } else if (existing.total !== b.total || existing.title !== b.title) {
+            await library.runAsync(
+              'UPDATE books SET title=?, total=?, updated_at=? WHERE id=?',
+              b.title,
+              b.total,
+              new Date().toISOString(),
+              b.id,
+            );
+          }
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('syncRemoteCatalog offline or failed:', err);
+  }
+}
+
 async function applyRemote(rows: import('../api/client').RemoteProgress[]) {
   const userId = cloud.user?.id;
   if (!userId) return;
   for (const row of rows) {
-    const chapter = await library.getFirstAsync(
-      'SELECT id FROM chapters WHERE book_id=? AND id=?',
+    await library.runAsync(
+      'INSERT OR REPLACE INTO account_progress(user_id,book_id,chapter_id,offset,updated_at) VALUES(?,?,?,?,?)',
+      userId,
       row.book_id,
       row.chapter_id,
+      row.location_kind === 'pixel' ? row.pixel : 0,
+      row.updated_at,
     );
-    if (chapter)
-      await library.runAsync(
-        'INSERT OR REPLACE INTO account_progress(user_id,book_id,chapter_id,offset,updated_at) VALUES(?,?,?,?,?)',
-        userId,
-        row.book_id,
-        row.chapter_id,
-        row.location_kind === 'pixel' ? row.pixel : 0,
-        row.updated_at,
-      );
   }
 }
 export async function listBooks(): Promise<Book[]> {
@@ -109,27 +143,107 @@ export async function getChapterPage(
 ): Promise<{ rows: ChapterMeta[]; total: number }> {
   const sql = chapterPageQuery(bookId, query, markedOnly, page);
   const count = await library.getFirstAsync<{ total: number }>(sql.countSQL, ...sql.countArgs);
-  const rows = await library.getAllAsync<ChapterMeta>(sql.rowsSQL, ...sql.rowArgs);
-  return { rows, total: count?.total || 0 };
+  let rows = await library.getAllAsync<ChapterMeta>(sql.rowsSQL, ...sql.rowArgs);
+  let total = count?.total || 0;
+
+  if (markedOnly || query.trim()) {
+    return { rows, total };
+  }
+
+  // If local SQLite does not have this page's chapters, fetch from cloud API
+  if (rows.length === 0) {
+    try {
+      const remote = await cloud.request<{
+        items: Array<{ id: string; position: number; number: number; title: string }>;
+        total: number;
+      }>(
+        `/public/books/${bookId}/chapters?page=${page + 1}&page_size=${CHAPTER_PAGE_SIZE}`,
+        undefined,
+        'GET',
+        5000,
+      );
+      if (remote && Array.isArray(remote.items) && remote.items.length > 0) {
+        await library.withTransactionAsync(async () => {
+          for (const item of remote.items) {
+            await library.runAsync(
+              'INSERT OR IGNORE INTO chapters(id,book_id,position,number,title,content,url,search_title) VALUES (?,?,?,?,?,?,?,?)',
+              item.id,
+              bookId,
+              item.position,
+              item.number,
+              item.title,
+              '',
+              '',
+              fold(item.title),
+            );
+          }
+        });
+        total = remote.total;
+        rows = await library.getAllAsync<ChapterMeta>(sql.rowsSQL, ...sql.rowArgs);
+      }
+    } catch (err) {
+      console.warn('getChapterPage remote error:', err);
+    }
+  }
+
+  return { rows, total };
 }
 export { CHAPTER_PAGE_SIZE };
 export async function getChapterAt(bookId: string, position: number): Promise<ChapterMeta | null> {
-  return library.getFirstAsync<ChapterMeta>(
+  const local = await library.getFirstAsync<ChapterMeta>(
     'SELECT id,position,number,title,0 AS marked FROM chapters WHERE book_id=? AND position=?',
     bookId,
     position,
   );
+  if (local) return local;
+
+  try {
+    const remote = await cloud.request<{
+      id: string;
+      position: number;
+      number: number;
+      title: string;
+      content?: string;
+    }>(`/public/books/${bookId}/chapters/${position}`, undefined, 'GET', 5000);
+    if (remote && remote.id) {
+      await library.runAsync(
+        'INSERT OR REPLACE INTO chapters(id,book_id,position,number,title,content,url,search_title) VALUES (?,?,?,?,?,?,?,?)',
+        remote.id,
+        bookId,
+        remote.position,
+        remote.number,
+        remote.title,
+        remote.content || '',
+        '',
+        fold(remote.title),
+      );
+      return {
+        id: remote.id,
+        position: remote.position,
+        number: remote.number,
+        title: remote.title,
+        marked: 0,
+      };
+    }
+  } catch (err) {
+    console.warn('getChapterAt remote error:', err);
+  }
+  return null;
 }
 export async function getNeighbor(
   bookId: string,
   position: number,
   direction: -1 | 1,
 ): Promise<ChapterMeta | null> {
-  return library.getFirstAsync<ChapterMeta>(
-    `SELECT id,position,number,title,0 AS marked FROM chapters WHERE book_id=? AND position ${direction === 1 ? '>' : '<'} ? ORDER BY position ${direction === 1 ? 'ASC' : 'DESC'} LIMIT 1`,
+  const nextPos = position + direction;
+  if (nextPos < 0) return null;
+  const book = await library.getFirstAsync<{ total: number }>(
+    'SELECT total FROM books WHERE id=?',
     bookId,
-    position,
   );
+  if (book && nextPos >= book.total) return null;
+
+  return getChapterAt(bookId, nextPos);
 }
 export async function getChapter(bookId: string, id: string): Promise<Chapter | null> {
   const row = await library.getFirstAsync<Chapter>(
@@ -146,10 +260,16 @@ export async function getChapter(bookId: string, id: string): Promise<Chapter | 
           `/public/books/${bookId}/chapters/${row.position}`,
           undefined,
           'GET',
-          1500,
+          5000,
         );
         if (remote.id !== row.id || !remote.content.trim())
           throw new Error('Nội dung trên máy chủ không khớp chương đang đọc.');
+        await library.runAsync(
+          'UPDATE chapters SET content=? WHERE book_id=? AND id=?',
+          remote.content,
+          bookId,
+          id,
+        );
         return remote.content;
       },
     );
@@ -166,13 +286,12 @@ export async function saveProgress(bookId: string, chapterId: string, offset: nu
       Math.max(0, offset),
       new Date().toISOString(),
     );
-    if (bookId === meta.bookId)
-      await cloud.queue(bookId, {
-        chapter_id: chapterId,
-        version: meta.hash,
-        location_kind: 'pixel',
-        location_value: Math.max(0, offset),
-      });
+    await cloud.queue(bookId, {
+      chapter_id: chapterId,
+      version: bookId === meta.bookId ? meta.hash : 'v1',
+      location_kind: 'pixel',
+      location_value: Math.max(0, offset),
+    });
     return;
   }
   await library.runAsync(
