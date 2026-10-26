@@ -63,9 +63,27 @@ export function createCloud(storage: Storage, credentials: Storage, defaultUrl: 
         },
         ...(body ? { body: isFormData ? body : JSON.stringify(body) } : {}),
       });
-      const json = await response.json();
-      if (!response.ok)
-        throw new ApiError(response.status, json.message || 'Không kết nối được máy chủ.');
+      let json: { data?: T; message?: string } | null = null;
+      try {
+        json = await response.json();
+      } catch {
+        // Non-JSON response (e.g. HTML error from reverse proxy)
+      }
+
+      if (!response.ok) {
+        if (response.status === 413)
+          throw new ApiError(
+            413,
+            'File quá lớn, vượt quá giới hạn tải lên của máy chủ (tối đa 250MB).',
+          );
+        if (response.status === 401)
+          throw new ApiError(401, json?.message || 'Vui lòng đăng nhập để thực hiện thao tác này.');
+        throw new ApiError(response.status, json?.message || `Lỗi máy chủ (${response.status}).`);
+      }
+
+      if (!json)
+        throw new ApiError(response.status, 'Phản hồi từ máy chủ không đúng định dạng JSON.');
+
       return json.data as T;
     } finally {
       clearTimeout(timeout);
