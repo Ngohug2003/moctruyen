@@ -15,6 +15,7 @@ export type Book = {
   id: string;
   title: string;
   total: number;
+  version?: string;
   source: string;
   updated_at: string;
   chapter_id: string | null;
@@ -116,6 +117,9 @@ export async function initializeWeb() {
 export async function initialize(seed: SQLiteDatabase) {
   library = await openDatabaseAsync('moc-library.db');
   await library.execAsync('PRAGMA journal_mode = WAL; ' + SCHEMA);
+  try {
+    await library.execAsync('ALTER TABLE books ADD COLUMN version TEXT DEFAULT ""');
+  } catch {}
   await library.execAsync(
     'CREATE TABLE IF NOT EXISTS account_progress (user_id TEXT NOT NULL, book_id TEXT NOT NULL, chapter_id TEXT NOT NULL, offset REAL NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY(user_id,book_id))',
   );
@@ -158,6 +162,7 @@ export async function syncRemoteCatalog(): Promise<void> {
             id: b.id,
             title: b.title,
             total: b.total,
+            version: b.version,
             source: 'cloud',
             updated_at: new Date().toISOString(),
             chapter_id: prog?.chapter_id || null,
@@ -170,24 +175,26 @@ export async function syncRemoteCatalog(): Promise<void> {
       }
       await library.withTransactionAsync(async () => {
         for (const b of remote.items) {
-          const existing = await library.getFirstAsync<{ id: string; total: number; title: string }>(
-            'SELECT id, total, title FROM books WHERE id=?',
+          const existing = await library.getFirstAsync<{ id: string; total: number; title: string; version?: string }>(
+            'SELECT id, total, title, version FROM books WHERE id=?',
             b.id,
           );
           if (!existing) {
             await library.runAsync(
-              'INSERT INTO books(id,title,total,source,updated_at) VALUES (?,?,?,?,?)',
+              'INSERT INTO books(id,title,total,version,source,updated_at) VALUES (?,?,?,?,?,?)',
               b.id,
               b.title,
               b.total,
+              b.version || '',
               'cloud',
               new Date().toISOString(),
             );
-          } else if (existing.total !== b.total || existing.title !== b.title) {
+          } else if (existing.total !== b.total || existing.title !== b.title || existing.version !== b.version) {
             await library.runAsync(
-              'UPDATE books SET title=?, total=?, updated_at=? WHERE id=?',
+              'UPDATE books SET title=?, total=?, version=?, updated_at=? WHERE id=?',
               b.title,
               b.total,
+              b.version || '',
               new Date().toISOString(),
               b.id,
             );
@@ -220,13 +227,29 @@ export async function listBooks(): Promise<Book[]> {
   }
   if (cloud.user)
     return library.getAllAsync<Book>(
-      `SELECT b.*,p.chapter_id,p.offset,c.title AS chapter_title,c.position FROM books b LEFT JOIN account_progress p ON p.book_id=b.id AND p.user_id=? LEFT JOIN chapters c ON c.book_id=b.id AND c.id=p.chapter_id ORDER BY COALESCE(p.updated_at,b.updated_at) DESC`,
+      `SELECT b.*,
+              COALESCE(ap.chapter_id, p.chapter_id) AS chapter_id,
+              COALESCE(ap.offset, p.offset) AS offset,
+              c.title AS chapter_title,
+              c.position
+       FROM books b
+       LEFT JOIN account_progress ap ON ap.book_id=b.id AND ap.user_id=?
+       LEFT JOIN progress p ON p.book_id=b.id
+       LEFT JOIN chapters c ON c.book_id=b.id AND c.id=COALESCE(ap.chapter_id, p.chapter_id)
+       ORDER BY COALESCE(ap.updated_at, p.updated_at, b.updated_at) DESC`,
       cloud.user.id,
     );
-  return library.getAllAsync<Book>(`SELECT b.*,p.chapter_id,p.offset,c.title AS chapter_title,c.position
-    FROM books b LEFT JOIN progress p ON p.book_id=b.id
-    LEFT JOIN chapters c ON c.book_id=b.id AND c.id=p.chapter_id
-    ORDER BY COALESCE(p.updated_at,b.updated_at) DESC`);
+  return library.getAllAsync<Book>(
+    `SELECT b.*,
+            p.chapter_id,
+            p.offset,
+            c.title AS chapter_title,
+            c.position
+     FROM books b
+     LEFT JOIN progress p ON p.book_id=b.id
+     LEFT JOIN chapters c ON c.book_id=b.id AND c.id=p.chapter_id
+     ORDER BY COALESCE(p.updated_at, b.updated_at) DESC`,
+  );
 }
 export async function getChapterPage(
   bookId: string,
@@ -326,8 +349,11 @@ export async function getChapterPage(
     return { rows, total };
   }
 
-  // If local SQLite does not have this page's chapters, fetch from cloud API
-  if (rows.length === 0) {
+  const bookInfo = await library.getFirstAsync<{ total: number }>('SELECT total FROM books WHERE id=?', bookId);
+  const bookTotal = bookInfo?.total || total;
+  const expectedCount = Math.min(CHAPTER_PAGE_SIZE, Math.max(0, bookTotal - page * CHAPTER_PAGE_SIZE));
+
+  if (rows.length < expectedCount) {
     try {
       const remote = await cloud.request<{
         items: Array<{ id: string; position: number; number: number; title: string }>;
@@ -336,13 +362,13 @@ export async function getChapterPage(
         `/public/books/${bookId}/chapters?page=${page + 1}&page_size=${CHAPTER_PAGE_SIZE}`,
         undefined,
         'GET',
-        5000,
+        8000,
       );
       if (remote && Array.isArray(remote.items) && remote.items.length > 0) {
         await library.withTransactionAsync(async () => {
           for (const item of remote.items) {
             await library.runAsync(
-              'INSERT OR IGNORE INTO chapters(id,book_id,position,number,title,content,url,search_title) VALUES (?,?,?,?,?,?,?,?)',
+              'INSERT INTO chapters(id,book_id,position,number,title,content,url,search_title) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(book_id, id) DO UPDATE SET position=excluded.position, number=excluded.number, title=excluded.title, search_title=excluded.search_title',
               item.id,
               bookId,
               item.position,
@@ -354,7 +380,7 @@ export async function getChapterPage(
             );
           }
         });
-        total = remote.total;
+        total = remote.total || bookTotal;
         rows = await library.getAllAsync<ChapterMeta>(sql.rowsSQL, ...sql.rowArgs);
       }
     } catch (err) {
@@ -362,7 +388,7 @@ export async function getChapterPage(
     }
   }
 
-  return { rows, total };
+  return { rows, total: Math.max(total, bookTotal) };
 }
 export { CHAPTER_PAGE_SIZE };
 export async function getChapterAt(bookId: string, position: number): Promise<ChapterMeta | null> {
@@ -449,10 +475,10 @@ export async function getChapterAt(bookId: string, position: number): Promise<Ch
       number: number;
       title: string;
       content?: string;
-    }>(`/public/books/${bookId}/chapters/${position}`, undefined, 'GET', 5000);
+    }>(`/public/books/${bookId}/chapters/${position}`, undefined, 'GET', 8000);
     if (remote && remote.id) {
       await library.runAsync(
-        'INSERT OR REPLACE INTO chapters(id,book_id,position,number,title,content,url,search_title) VALUES (?,?,?,?,?,?,?,?)',
+        'INSERT INTO chapters(id,book_id,position,number,title,content,url,search_title) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(book_id, id) DO UPDATE SET position=excluded.position, number=excluded.number, title=excluded.title, content=CASE WHEN excluded.content != "" THEN excluded.content ELSE chapters.content END, search_title=excluded.search_title',
         remote.id,
         bookId,
         remote.position,
@@ -551,12 +577,44 @@ export async function getChapter(bookId: string, id: string): Promise<Chapter | 
     return item || null;
   }
 
-  const row = await library.getFirstAsync<Chapter>(
+  let row = await library.getFirstAsync<Chapter>(
     `SELECT c.*,CASE WHEN m.chapter_id IS NULL THEN 0 ELSE 1 END AS marked
     FROM chapters c LEFT JOIN bookmarks m ON m.book_id=c.book_id AND m.chapter_id=c.id WHERE c.book_id=? AND c.id=?`,
     bookId,
     id,
   );
+  if (!row) {
+    try {
+      const remote = await cloud.request<{
+        id: string;
+        position: number;
+        number: number;
+        title: string;
+        content?: string;
+      }>(`/public/books/${bookId}/chapters/by-id/${id}`, undefined, 'GET', 8000);
+      if (remote && remote.id) {
+        await library.runAsync(
+          'INSERT INTO chapters(id,book_id,position,number,title,content,url,search_title) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(book_id, id) DO UPDATE SET position=excluded.position, number=excluded.number, title=excluded.title, content=excluded.content, search_title=excluded.search_title',
+          remote.id,
+          bookId,
+          remote.position,
+          remote.number,
+          remote.title,
+          remote.content || '',
+          '',
+          fold(remote.title),
+        );
+        row = await library.getFirstAsync<Chapter>(
+          `SELECT c.*,CASE WHEN m.chapter_id IS NULL THEN 0 ELSE 1 END AS marked
+          FROM chapters c LEFT JOIN bookmarks m ON m.book_id=c.book_id AND m.chapter_id=c.id WHERE c.book_id=? AND c.id=?`,
+          bookId,
+          id,
+        );
+      }
+    } catch (err) {
+      console.warn('getChapter by-id remote error:', err);
+    }
+  }
   if (row && !row.content) {
     row.content = await readLocalFirst(
       () => getBundledContent(bookId, row.position, row.id),
@@ -565,7 +623,7 @@ export async function getChapter(bookId: string, id: string): Promise<Chapter | 
           `/public/books/${bookId}/chapters/${row.position}`,
           undefined,
           'GET',
-          5000,
+          8000,
         );
         if (remote.id !== row.id || !remote.content.trim())
           throw new Error('Nội dung trên máy chủ không khớp chương đang đọc.');
@@ -585,15 +643,27 @@ export async function saveProgress(bookId: string, chapterId: string, offset: nu
   if (Platform.OS === 'web') {
     saveWebProgress(bookId, chapterId, offset);
     if (cloud.user) {
+      const b = webBooksMap.get(bookId);
+      const ver = bookId === meta.bookId ? meta.hash : (b?.version || '20261026045840');
       await cloud.queue(bookId, {
         chapter_id: chapterId,
-        version: bookId === meta.bookId ? meta.hash : 'v1',
+        version: ver,
         location_kind: 'pixel',
         location_value: Math.max(0, offset),
       });
     }
     return;
   }
+
+  const now = new Date().toISOString();
+  await library.runAsync(
+    'INSERT OR REPLACE INTO progress(book_id,chapter_id,offset,updated_at) VALUES (?,?,?,?)',
+    bookId,
+    chapterId,
+    Math.max(0, offset),
+    now,
+  );
+
   if (cloud.user) {
     await library.runAsync(
       'INSERT OR REPLACE INTO account_progress(user_id,book_id,chapter_id,offset,updated_at) VALUES(?,?,?,?,?)',
@@ -601,23 +671,17 @@ export async function saveProgress(bookId: string, chapterId: string, offset: nu
       bookId,
       chapterId,
       Math.max(0, offset),
-      new Date().toISOString(),
+      now,
     );
+    const b = await library.getFirstAsync<{ version?: string }>('SELECT version FROM books WHERE id=?', bookId);
+    const ver = bookId === meta.bookId ? meta.hash : (b?.version || '20261026045840');
     await cloud.queue(bookId, {
       chapter_id: chapterId,
-      version: bookId === meta.bookId ? meta.hash : 'v1',
+      version: ver,
       location_kind: 'pixel',
       location_value: Math.max(0, offset),
     });
-    return;
   }
-  await library.runAsync(
-    'INSERT OR REPLACE INTO progress(book_id,chapter_id,offset,updated_at) VALUES (?,?,?,?)',
-    bookId,
-    chapterId,
-    Math.max(0, offset),
-    new Date().toISOString(),
-  );
 }
 export async function toggleBookmark(bookId: string, chapterId: string): Promise<boolean> {
   if (Platform.OS === 'web') {

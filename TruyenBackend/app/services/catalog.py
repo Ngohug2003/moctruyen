@@ -27,6 +27,13 @@ async def chapter(db, book_id, position):
     return row
 
 
+async def chapter_by_id(db, book_id, chapter_id):
+    row = await repo.chapter_by_id(db, chapter_id)
+    if not row or row.book_id != book_id:
+        raise DomainError(404, "CHAPTER_NOT_FOUND", "Không tìm thấy chương.")
+    return row
+
+
 async def upload_book(
     db,
     filename: str,

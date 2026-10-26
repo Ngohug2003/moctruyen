@@ -31,6 +31,11 @@ async def chapter(book_id: str, position: int, db=Depends(session)):
     return dict(data=await catalog.chapter(db, book_id, position))
 
 
+@router.get("/books/{book_id}/chapters/by-id/{chapter_id}", response_model=GenericResponse[ChapterOut])
+async def chapter_by_id(book_id: str, chapter_id: str, db=Depends(session)):
+    return dict(data=await catalog.chapter_by_id(db, book_id, chapter_id))
+
+
 @router.get("/books/{book_id}/cultivation", response_model=GenericResponse[CultivationOut])
 async def cultivation(book_id: str, db=Depends(session)):
     return {"data": await cultivation_service.get_guide(db, book_id)}

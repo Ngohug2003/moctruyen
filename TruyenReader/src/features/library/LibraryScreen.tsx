@@ -141,10 +141,19 @@ export function LibraryScreen() {
         setBusy('');
         return;
       }
-      const target = b.chapter_id ? await db.getChapter(b.id, b.chapter_id) : null;
-      if (target) {
-        await openChapter(b, target.id, b.offset || 0);
-        return;
+      if (b.chapter_id) {
+        const target = await db.getChapter(b.id, b.chapter_id);
+        if (target) {
+          await openChapter(b, target.id, b.offset || 0);
+          return;
+        }
+      }
+      if (b.position != null) {
+        const atPos = await db.getChapterAt(b.id, b.position);
+        if (atPos) {
+          await openChapter(b, atPos.id, b.offset || 0);
+          return;
+        }
       }
       const first = await db.getChapterAt(b.id, 0);
       if (!first) throw new Error('Truyện chưa có chương.');

@@ -8,6 +8,7 @@ import {
   readSync,
   closeSync,
   renameSync,
+  copyFileSync,
   writeFileSync,
 } from 'node:fs';
 import { resolve } from 'node:path';
@@ -104,7 +105,11 @@ export async function downloadApk(root, build, meta = null) {
       if (header.toString('hex') !== '504b0304')
         throw new Error('File tải về không phải gói APK/ZIP hợp lệ.');
       renameSync(temp, resolve(folder, 'MocReader.apk'));
-      console.log(`\nAPK đã lưu: ${resolve(folder, 'MocReader.apk')}\nTrang build: ${buildUrl}`);
+      const appJson = JSON.parse(readFileSync(resolve(root, 'app.json'), 'utf8')).expo;
+      const verName = appJson.version || '1.0.8';
+      const versionedApk = resolve(folder, `MocReader-v${verName}.apk`);
+      copyFileSync(resolve(folder, 'MocReader.apk'), versionedApk);
+      console.log(`\nAPK đã lưu: ${resolve(folder, 'MocReader.apk')}\nBản version: ${versionedApk}\nTrang build: ${buildUrl}`);
       return;
     } catch (error) {
       if (attempt === 3)
