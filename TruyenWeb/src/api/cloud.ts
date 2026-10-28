@@ -11,7 +11,7 @@ const credentials = {
     sessionStorage.setItem(key, value);
   },
 };
-export const DEFAULT_API_URL = 'https://moctruyen.onrender.com';
+export const DEFAULT_API_URL = 'http://3.104.65.209:8000';
 
 export const cloud = createCloud(
   storage,
