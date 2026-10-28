@@ -50,5 +50,5 @@ const secure = {
 export const cloud = createCloud(
   storage,
   secure,
-  process.env.EXPO_PUBLIC_API_URL || 'http://3.104.65.209:8000',
+  process.env.EXPO_PUBLIC_API_URL || 'https://api.hungworks.io.vn',
 );

@@ -11,7 +11,7 @@ const credentials = {
     sessionStorage.setItem(key, value);
   },
 };
-export const DEFAULT_API_URL = 'http://3.104.65.209:8000';
+export const DEFAULT_API_URL = 'https://api.hungworks.io.vn';
 
 export const cloud = createCloud(
   storage,

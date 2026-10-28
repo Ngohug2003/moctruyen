@@ -14,7 +14,7 @@
       "environment": "preview",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://3.104.65.209:8000"
+        "EXPO_PUBLIC_API_URL": "https://api.hungworks.io.vn"
       }
     },
     "production": {
@@ -24,7 +24,7 @@
       "node": "24.16.0",
       "environment": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "http://3.104.65.209:8000"
+        "EXPO_PUBLIC_API_URL": "https://api.hungworks.io.vn"
       },
       "autoIncrement": true
     }

@@ -121,7 +121,7 @@ export function prepareBooks() {
     );
   } else {
     console.log(
-      'Thư viện web: Không có truyện tĩnh đóng gói sẵn; web sẽ tải danh mục và chương trực tuyến qua API http://3.104.65.209:8000.',
+      'Thư viện web: Không có truyện tĩnh đóng gói sẵn; web sẽ tải danh mục và chương trực tuyến qua API https://api.hungworks.io.vn.',
     );
   }
   return library;

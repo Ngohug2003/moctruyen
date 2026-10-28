@@ -3,7 +3,7 @@ x-backend: &backend
   image: moc-truyen-api:local
   environment: &environment
     DATABASE_URL: postgresql+asyncpg://moc:${POSTGRES_PASSWORD:?Run CHAY_DOCKER.bat first}@db:5432/moc
-    CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:5178","http://127.0.0.1:5178"]}
+    CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:5178","http://127.0.0.1:5178","https://truyenww-binjnixqf-ngoviethung0911-gmailcoms-projects.vercel.app"]}
 services:
   db:
     image: postgres:16-bookworm
