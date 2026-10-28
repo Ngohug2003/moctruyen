@@ -1,0 +1,88 @@
+name: Backend CI and deploy
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['TruyenBackend/**', '.github/workflows/backend.yml']
+  push:
+    branches: [main]
+    paths: ['TruyenBackend/**', '.github/workflows/backend.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      POSTGRES_PASSWORD: ci-disposable-password
+      COMPOSE_PROJECT_NAME: moc-ci
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Build backend
+        working-directory: TruyenBackend
+        run: docker compose build api
+      - name: Check installed dependencies
+        run: docker run --rm --entrypoint python moc-truyen-api:local -m pip check
+      - name: Test against isolated PostgreSQL
+        working-directory: TruyenBackend
+        run: docker compose --profile test run --rm tests
+      - name: Stop CI containers
+        if: always()
+        working-directory: TruyenBackend
+        run: docker compose --profile test down
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.ENABLE_EC2_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      EC2_HOST: ${{ vars.EC2_HOST || '3.104.65.209' }}
+      EC2_USER: ${{ vars.EC2_USER || 'ubuntu' }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
+        run: |
+          test -n "$SSH_KEY" && test -n "$KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Deploy tested commit
+        run: |
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 \
+            "$EC2_USER@$EC2_HOST" bash -s -- "$GITHUB_SHA" \
+            < TruyenBackend/scripts/deploy.sh
+      - name: Check public HTTPS endpoint
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 5 --retry-all-errors --max-time 15 https://api.hungworks.io.vn/ready
+      - name: Check production web CORS
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          origin = "https://truyenww.vercel.app"
+          request = urllib.request.Request(
+              "https://api.hungworks.io.vn/api/v1/public/books?page_size=1",
+              method="OPTIONS",
+              headers={"Origin": origin, "Access-Control-Request-Method": "GET",
+                       "Access-Control-Request-Headers": "content-type"},
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              assert response.headers.get("Access-Control-Allow-Origin") == origin
+          PY
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519

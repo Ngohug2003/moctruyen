@@ -42,3 +42,7 @@ The test profile uses a separate database. The project is local/LAN; hosting req
 Bảng cảnh giới Đế Bá được lưu trong `cultivation_guides`, `realm_systems`, `cultivation_realms`. Migration `0003` thêm schema; seed gọi thêm `python -m app.commands.seed_cultivation`. Dataset chuẩn ở `data/cultivation/de-ba.json`; endpoint public `/api/v1/public/books/{book_id}/cultivation`. Có 7 nhóm giới vực và 68 mục tra cứu, bao gồm nhánh tu luyện và ghi chú nguồn chưa xác nhận. Tên và tiểu cảnh theo ví dụ/ảnh người dùng, biến thể trong bản truyện được giữ làm alias.
 
 Web does not depend on API/DB readiness. Run `docker compose --env-file .docker.env up -d --build web` to serve the bundled JSON reader alone, or use `../TruyenWeb/CHAY_WEB.bat` without Docker. Nginx resolves the optional API on demand, so its absence does not block static reading. Do not start both web servers on port 5178 simultaneously.
+
+## EC2 CI/CD
+
+GitHub Actions now builds/tests backend changes and can deploy main to the existing EC2 server after one-time SSH setup. See [docker/DEPLOY.md](docker/DEPLOY.md) for repository secrets, activation and manual commands. Production CORS and API binding live in `docker/production.env`; database credentials stay in the server `.docker.env`.
