@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Mộc · Đọc truyện v1.0.9",
+    "name": "Mộc · Đọc truyện v1.0.10",
     "slug": "moctruyen",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#F5F2EB",
