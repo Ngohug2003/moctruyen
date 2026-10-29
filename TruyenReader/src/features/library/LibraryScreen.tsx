@@ -49,15 +49,17 @@ export function LibraryScreen() {
   const readerSession = useRef<ReadingSession | null>(null);
   const p = palettes[settings.theme];
   const refresh = useCallback(async () => {
-    await db.syncRemoteCatalog();
+    try {
+      await Promise.allSettled([cloud.sync(), db.syncRemoteCatalog()]);
+    } catch {}
     setBooks(await db.listBooks());
   }, []);
   useEffect(
     () =>
       cloud.subscribe(() => {
-        void refresh();
+        void db.listBooks().then(setBooks);
       }),
-    [refresh],
+    [],
   );
   const closeReader = useCallback(async () => {
     const request = ++sequence.current;
@@ -83,23 +85,25 @@ export function LibraryScreen() {
   }, [tab, books]);
   useEffect(() => {
     let active = true;
-    Promise.all([db.listBooks(), db.loadSettings()])
-      .then(([items, readerSettings]) => {
+    (async () => {
+      try {
+        const [items, readerSettings] = await Promise.all([db.listBooks(), db.loadSettings()]);
         if (!active) return;
         setBooks(items);
         setSettings(readerSettings);
-        return db.syncRemoteCatalog();
-      })
-      .then(() => db.listBooks())
-      .then((updated) => {
+        setStarting(false);
+
+        // Prioritize API: sync catalog and user progress from API
+        await Promise.allSettled([cloud.sync(), db.syncRemoteCatalog()]);
+        const updated = await db.listBooks();
         if (active) setBooks(updated);
-      })
-      .catch((e) => {
-        if (active) Alert.alert('Không mở được thư viện', errorMessage(e));
-      })
-      .finally(() => {
-        if (active) setStarting(false);
-      });
+      } catch (e) {
+        if (active) {
+          setStarting(false);
+          Alert.alert('Không mở được thư viện', errorMessage(e));
+        }
+      }
+    })();
     return () => {
       active = false;
     };
@@ -133,6 +137,11 @@ export function LibraryScreen() {
   async function openBook(b: db.Book, showList = false) {
     setBusy('Đang mở truyện…');
     try {
+      if (cloud.user) {
+        try {
+          await cloud.sync();
+        } catch {}
+      }
       const latest = (await db.listBooks()).find((x) => x.id === b.id);
       if (latest) b = latest;
       setBook(b);

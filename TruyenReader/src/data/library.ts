@@ -121,8 +121,17 @@ export async function initialize(seed: SQLiteDatabase) {
     await library.execAsync("ALTER TABLE books ADD COLUMN version TEXT DEFAULT ''");
   } catch {}
   await library.execAsync(
-    'CREATE TABLE IF NOT EXISTS account_progress (user_id TEXT NOT NULL, book_id TEXT NOT NULL, chapter_id TEXT NOT NULL, offset REAL NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY(user_id,book_id))',
+    'CREATE TABLE IF NOT EXISTS account_progress (user_id TEXT NOT NULL, book_id TEXT NOT NULL, chapter_id TEXT NOT NULL, offset REAL NOT NULL, updated_at TEXT NOT NULL, position INTEGER, chapter_title TEXT, ratio REAL, PRIMARY KEY(user_id,book_id))',
   );
+  try {
+    await library.execAsync('ALTER TABLE account_progress ADD COLUMN position INTEGER');
+  } catch {}
+  try {
+    await library.execAsync('ALTER TABLE account_progress ADD COLUMN chapter_title TEXT');
+  } catch {}
+  try {
+    await library.execAsync('ALTER TABLE account_progress ADD COLUMN ratio REAL');
+  } catch {}
   await cloud.init();
   cloud.receive(applyRemote);
   void cloud.sync();
@@ -206,6 +215,11 @@ export async function syncRemoteCatalog(): Promise<void> {
         }
       });
     }
+    if (cloud.user) {
+      try {
+        await cloud.sync();
+      } catch {}
+    }
   } catch (err) {
     console.warn('syncRemoteCatalog offline or failed:', err);
   }
@@ -215,14 +229,41 @@ async function applyRemote(rows: import('../api/client').RemoteProgress[]) {
   const userId = cloud.user?.id;
   if (!userId) return;
   for (const row of rows) {
+    const offset = row.location_kind === 'pixel' ? (row.pixel || 0) : (row.ratio || 0);
+    const ratio = row.location_kind === 'ratio' ? (row.ratio || 0) : 0;
     await library.runAsync(
-      'INSERT OR REPLACE INTO account_progress(user_id,book_id,chapter_id,offset,updated_at) VALUES(?,?,?,?,?)',
+      'INSERT OR REPLACE INTO account_progress(user_id,book_id,chapter_id,offset,updated_at,position,chapter_title,ratio) VALUES(?,?,?,?,?,?,?,?)',
       userId,
       row.book_id,
       row.chapter_id,
-      row.location_kind === 'pixel' ? row.pixel : 0,
+      offset,
+      row.updated_at,
+      row.position != null ? row.position : null,
+      row.title || null,
+      ratio,
+    );
+    await library.runAsync(
+      'INSERT OR REPLACE INTO progress(book_id,chapter_id,offset,updated_at) VALUES (?,?,?,?)',
+      row.book_id,
+      row.chapter_id,
+      offset,
       row.updated_at,
     );
+    if (row.chapter_id && row.position != null && row.title) {
+      try {
+        await library.runAsync(
+          'INSERT INTO chapters(id,book_id,position,number,title,content,url,search_title) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(book_id, id) DO UPDATE SET position=excluded.position, title=excluded.title, search_title=excluded.search_title',
+          row.chapter_id,
+          row.book_id,
+          row.position,
+          row.position + 1,
+          row.title,
+          '',
+          '',
+          fold(row.title),
+        );
+      } catch {}
+    }
   }
 }
 export async function listBooks(): Promise<Book[]> {
@@ -234,8 +275,8 @@ export async function listBooks(): Promise<Book[]> {
       `SELECT b.*,
               COALESCE(ap.chapter_id, p.chapter_id) AS chapter_id,
               COALESCE(ap.offset, p.offset) AS offset,
-              c.title AS chapter_title,
-              c.position
+              COALESCE(ap.chapter_title, c.title) AS chapter_title,
+              COALESCE(ap.position, c.position) AS position
        FROM books b
        LEFT JOIN account_progress ap ON ap.book_id=b.id AND ap.user_id=?
        LEFT JOIN progress p ON p.book_id=b.id
@@ -669,13 +710,21 @@ export async function saveProgress(bookId: string, chapterId: string, offset: nu
   );
 
   if (cloud.user) {
+    const ch = await library.getFirstAsync<{ title: string; position: number }>(
+      'SELECT title, position FROM chapters WHERE book_id=? AND id=?',
+      bookId,
+      chapterId,
+    );
     await library.runAsync(
-      'INSERT OR REPLACE INTO account_progress(user_id,book_id,chapter_id,offset,updated_at) VALUES(?,?,?,?,?)',
+      'INSERT OR REPLACE INTO account_progress(user_id,book_id,chapter_id,offset,updated_at,position,chapter_title,ratio) VALUES(?,?,?,?,?,?,?,?)',
       cloud.user.id,
       bookId,
       chapterId,
       Math.max(0, offset),
       now,
+      ch?.position ?? null,
+      ch?.title ?? null,
+      0,
     );
     const b = await library.getFirstAsync<{ version?: string }>('SELECT version FROM books WHERE id=?', bookId);
     const ver = bookId === meta.bookId ? meta.hash : (b?.version || '20261026045840');

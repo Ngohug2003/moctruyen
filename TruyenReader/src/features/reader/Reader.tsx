@@ -83,7 +83,11 @@ export function Reader({
   const restorePosition = () => {
     if (restored.current || !contentHeight.current || !height.current) return;
     restored.current = true;
-    const y = Math.min(initialOffset, Math.max(0, contentHeight.current - height.current));
+    const maxScroll = Math.max(0, contentHeight.current - height.current);
+    const y =
+      initialOffset > 0 && initialOffset <= 1
+        ? Math.round(initialOffset * maxScroll)
+        : Math.min(initialOffset, maxScroll);
     offset.current = y;
     requestAnimationFrame(() => scroll.current?.scrollTo({ y, animated: false }));
     save();
